@@ -14,6 +14,13 @@ test_that("list_designs print is compact", {
   expect_match(out, "two_arm_trial")
   expect_match(out, "design_info")
   expect_false(grepl("include_in_shiny", out))
+  # params not discovered → omitted from print
+  expect_false(grepl("\\bparams\\b", out))
+  # templates first among printed rows
+  expect_true(which(idx$category == "template")[1] < which(idx$category == "rdss")[1])
+  if (nrow(idx) > 5L) {
+    expect_match(out, "more")
+  }
 })
 
 test_that("YAML-less defaults fill category and object", {

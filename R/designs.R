@@ -157,27 +157,57 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
     out <- out[out$include_in_shiny, , drop = FALSE]
     rownames(out) <- NULL
   }
+  if (nrow(out)) {
+    # Template category first, then other categories / label
+    is_template <- tolower(trimws(as.character(out$category %||% ""))) %in%
+      c("template", "templates")
+    o <- order(!is_template, as.character(out$category), as.character(out$label), as.character(out$id))
+    out <- out[o, , drop = FALSE]
+    rownames(out) <- NULL
+  }
   structure(out, class = c("research_designs_list", "data.frame"))
 }
 
 #' @export
-print.research_designs_list <- function(x, ...) {
-  n <- nrow(x)
-  cat("ResearchDesigns library: ", n, " design", if (n == 1L) "" else "s", "\n\n", sep = "")
-  if (n > 0L) {
+print.research_designs_list <- function(x, ..., n = 5L) {
+  n_all <- nrow(x)
+  cat(
+    "ResearchDesigns library: ", n_all, " design",
+    if (n_all == 1L) "" else "s", "\n\n",
+    sep = ""
+  )
+  if (n_all > 0L) {
     alias <- as.character(x$alias)
     alias[is.na(alias)] <- ""
-    pkgs <- if ("packages" %in% names(x)) as.character(x$packages) else rep("", n)
+
+    params_chr <- if ("params" %in% names(x)) as.character(x$params) else rep(NA_character_, n_all)
+    show_params <- any(!is.na(params_chr) & nzchar(trimws(params_chr)))
+
+    pkgs <- if ("packages" %in% names(x)) as.character(x$packages) else rep("", n_all)
     pkgs[is.na(pkgs)] <- ""
+    has_pkg <- nzchar(trimws(pkgs))
+
     summary <- data.frame(
-      id = x$id,
+      id = as.character(x$id),
       alias = alias,
-      label = x$label,
-      params = x$params,
-      packages = pkgs,
+      label = as.character(x$label),
       stringsAsFactors = FALSE
     )
-    print(summary, row.names = FALSE, right = FALSE, ...)
+    if (show_params) summary$params <- params_chr
+
+    n_show <- max(1L, as.integer(n)[1])
+    print(utils::head(summary, n_show), row.names = FALSE, right = FALSE, ...)
+    if (n_all > n_show) {
+      cat("\n... and ", n_all - n_show, " more.\n", sep = "")
+    }
+    if (any(has_pkg)) {
+      cat(
+        "\nPackages: ",
+        paste(sprintf("%s (%s)", x$id[has_pkg], trimws(pkgs[has_pkg])), collapse = "; "),
+        "\n",
+        sep = ""
+      )
+    }
   }
   cat(
     "\nSee design_info(\"id\") or get_args(\"id\") for details;\n",

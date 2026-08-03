@@ -741,9 +741,15 @@ server <- function(input, output, session) {
       any(is.finite(df$conf.low) & is.finite(df$conf.high))
     df$diagnosand <- factor(df$diagnosand, levels = unique(as.character(df$diagnosand)))
 
-    if (!is.null(inquiry_col)) {
+    use_color <- !is.null(inquiry_col) && length(unique(df[[inquiry_col]])) > 1L
+    # Also dodge when several series share a y-level (e.g. color by inquiry)
+    n_per_y <- as.integer(table(paste(df$diagnosand, df$.y, sep = "\r")))
+    need_dodge <- use_color || any(n_per_y > 1L)
+    pd <- if (need_dodge) ggplot2::position_dodge(width = 0.5) else "identity"
+
+    if (use_color) {
       df$.inquiry <- df[[inquiry_col]]
-      p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = .y, color = .inquiry))
+      p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = .y, color = .inquiry, group = .inquiry))
     } else {
       p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = .y))
     }
@@ -751,11 +757,12 @@ server <- function(input, output, session) {
       p <- p + ggplot2::geom_errorbarh(
         ggplot2::aes(xmin = conf.low, xmax = conf.high),
         height = 0.25,
+        position = pd,
         na.rm = TRUE
       )
     }
     p <- p +
-      ggplot2::geom_point(size = 2.4) +
+      ggplot2::geom_point(size = 2.4, position = pd) +
       ggplot2::facet_wrap(~diagnosand, scales = "free_x", ncol = 2) +
       ggplot2::theme_bw(base_size = 12) +
       ggplot2::labs(x = NULL, y = NULL, color = NULL)
@@ -768,6 +775,18 @@ server <- function(input, output, session) {
       )
     }
     p
+  }
+
+  # Dodge width in x-data units when x is numeric; otherwise a fraction of a category
+  dodge_width_for_x <- function(x) {
+    x <- x[is.finite(as.numeric(x))]
+    if (!length(x)) return(0.4)
+    if (is.numeric(x) || is.integer(x)) {
+      u <- sort(unique(as.numeric(x)))
+      if (length(u) >= 2L) return(0.25 * min(diff(u)))
+      return(0.1)
+    }
+    0.4
   }
 
   output$diagnosis_table <- renderTable({
@@ -983,21 +1002,35 @@ server <- function(input, output, session) {
       if (length(ranges) == 1L) {
         xp <- ranges[[1]]
         df$.x <- df[[xp]]
-        p <- ggplot2::ggplot(df, ggplot2::aes(x = .x, y = .y))
+        # Color by estimator when several share an x-value
+        est_col <- if ("estimator" %in% names(df)) "estimator" else NULL
+        use_color <- !is.null(est_col) && length(unique(df[[est_col]])) > 1L
+        if (use_color) {
+          df$.series <- factor(df[[est_col]])
+          p <- ggplot2::ggplot(df, ggplot2::aes(x = .x, y = .y, color = .series, group = .series))
+        } else {
+          p <- ggplot2::ggplot(df, ggplot2::aes(x = .x, y = .y, group = 1))
+        }
+        pd <- if (use_color) {
+          ggplot2::position_dodge(width = dodge_width_for_x(df$.x))
+        } else {
+          "identity"
+        }
         if (has_ci) {
           p <- p + ggplot2::geom_errorbar(
             ggplot2::aes(ymin = conf.low, ymax = conf.high),
             width = 0,
             size = 0.5,
+            position = pd,
             na.rm = TRUE
           )
         }
         p +
-          ggplot2::geom_line(size = 0.8) +
-          ggplot2::geom_point(size = 2.2) +
+          ggplot2::geom_line(size = 0.8, position = pd) +
+          ggplot2::geom_point(size = 2.2, position = pd) +
           ggplot2::facet_wrap(~diagnosand, scales = "free_y") +
           ggplot2::theme_bw(base_size = 12) +
-          ggplot2::labs(x = xp, y = y_col)
+          ggplot2::labs(x = xp, y = y_col, color = if (use_color) "estimator" else NULL)
       } else {
         xp <- input$mod_plot_x %||% obj$plot_x %||% ranges[[1]]
         gp <- input$mod_plot_group %||% obj$plot_group %||% ranges[[2]]
@@ -1006,18 +1039,20 @@ server <- function(input, output, session) {
         if (identical(xp, gp)) gp <- setdiff(ranges, xp)[1]
         df$.x <- df[[xp]]
         df$.g <- factor(df[[gp]])
+        pd <- ggplot2::position_dodge(width = dodge_width_for_x(df$.x))
         p <- ggplot2::ggplot(df, ggplot2::aes(x = .x, y = .y, color = .g, group = .g))
         if (has_ci) {
           p <- p + ggplot2::geom_errorbar(
             ggplot2::aes(ymin = conf.low, ymax = conf.high),
             width = 0,
             size = 0.5,
+            position = pd,
             na.rm = TRUE
           )
         }
         p +
-          ggplot2::geom_line(size = 0.8) +
-          ggplot2::geom_point(size = 2.2) +
+          ggplot2::geom_line(size = 0.8, position = pd) +
+          ggplot2::geom_point(size = 2.2, position = pd) +
           ggplot2::facet_wrap(~diagnosand, scales = "free_y") +
           ggplot2::theme_bw(base_size = 12) +
           ggplot2::labs(x = xp, y = y_col, color = gp)

@@ -5,9 +5,9 @@
 \title{Code for a design: simple \code{make_design()} call and/or full source}
 \usage{
 get_code(
-  design = c("logit_probit_ols", "pate_with_sampling", "two_arm_trial",
-    "two_arm_trial_rdss", "two_arm_with_blocks", "two_arm_with_blocks_rdss", "11.5",
-    "4.1", "2.1", "2.2"),
+  design = c("pate_with_sampling", "two_arm_trial", "two_arm_with_blocks",
+    "logit_probit_ols", "two_arm_trial_rdss", "two_arm_with_blocks_rdss", "4.1", "11.5",
+    "2.1", "2.2"),
   style = c("both", "simple", "full"),
   ...
 )

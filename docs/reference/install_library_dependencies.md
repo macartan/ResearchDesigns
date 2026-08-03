@@ -1,7 +1,8 @@
 # Install ResearchDesigns system dependencies
 
 Installs package Imports (and, by default, Suggests needed for the Shiny
-browser). GitHub-only stack packages (`DeclareDesignZero`,
+browser), plus any extra packages declared in design YAML `packages:`
+fields. GitHub-only stack packages (`DeclareDesignZero`,
 `fabricatrZero`) are installed via
 [`remotes::install_github()`](https://remotes.r-lib.org/reference/install_github.html).
 

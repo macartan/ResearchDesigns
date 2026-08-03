@@ -6,7 +6,11 @@ programmatic use (`info$id`, `info$params`, etc.).
 ## Usage
 
 ``` r
-design_info(design)
+design_info(
+  design = c("pate_with_sampling", "two_arm_trial", "two_arm_with_blocks",
+    "logit_probit_ols", "two_arm_trial_rdss", "two_arm_with_blocks_rdss", "4.1", "11.5",
+    "2.1", "2.2")
+)
 ```
 
 ## Arguments

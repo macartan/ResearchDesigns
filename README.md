@@ -29,7 +29,10 @@ Maintainer one-stop:
 
 ```r
 refresh_library()   # index + audit + bake previews (sims = 100)
+build_docs()        # pkgdown site -> docs/ (safe on Dropbox / Windows)
 ```
+
+If `pkgdown::build_site()` fails with `write_html` / "Error closing file", use `build_docs()` instead: it builds in a local temp folder, then copies into `docs/`.
 
 ## Server deploy
 

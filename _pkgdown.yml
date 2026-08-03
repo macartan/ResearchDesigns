@@ -40,10 +40,11 @@ reference:
   - get_preview
   - has_preview
 - title: Maintain
-  desc: Index, audit, bake previews, and refresh the library.
+  desc: Index, audit, bake previews, refresh the library, and build the site.
   contents:
   - refresh_library
   - make_index
   - audit_designs
   - bake_previews
+  - build_docs
   - contributor_checklist

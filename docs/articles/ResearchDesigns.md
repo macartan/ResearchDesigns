@@ -16,9 +16,8 @@ Here is the starter design `two_arm_trial`.
 ``` r
 ---
 id: two_arm_trial
-object: design
 label: Simple two-arm trial
-category: Other
+category: template
 keywords: [experiment, two-arm]
 description: >
   Simple two-arm trial with complete random assignment.
@@ -62,12 +61,28 @@ the maintainer audits, and
 
 ``` r
 
-list_designs()
+list_designs(discover_params = FALSE)
+#> ResearchDesigns library: 6 designs
+#> 
+#>  id                  alias label                    
+#>  pate_with_sampling  4.1   PATE with sampling       
+#>  two_arm_trial             Simple two-arm trial     
+#>  two_arm_with_blocks       Two-arm trial with blocks
+#>  logit_probit_ols    11.5  Logit, probit, or OLS?   
+#>  two_arm_trial_rdss  2.1   Two-arm trial from RDSS  
+#> 
+#> ... and 1 more.
+#> 
+#> Packages: logit_probit_ols (margins, broom)
+#> 
+#> See design_info("id") or get_args("id") for details;
+#> as.data.frame(list_designs()) for the full table.
 ```
 
 Call
 [`list_designs()`](https://macartan.github.io/ResearchDesigns/reference/list_designs.md)
-to see ids, aliases, labels, and modifiable parameters. Use
+to see ids, aliases, labels, packages, and (with
+`discover_params = TRUE`) modifiable parameters. Use
 `design_info("two_arm_trial")` for the English profile of one design, or
 `as.data.frame(list_designs())` for the full table.
 

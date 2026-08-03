@@ -9,9 +9,11 @@ A prototype for a library of declared designs using DeclareDesignZero.
 - Each design is a self-contained `.R` file under `inst/designs/`.
 - The **design object** is the source of truth for editable parameters.
 - Optional YAML frontmatter adds labels, categories, keywords, book
-  aliases, and `params:` tip strings.
-- Missing metadata falls back to sensible defaults (`category: Other`,
-  `object: design`, id = filename stem).
+  aliases, `packages:` extras, and `params:` tip strings.
+- YAML is optional. With no header: id = filename stem, label =
+  humanized id, `category: Other`, object name `design`,
+  `include_in_shiny: true`. Set `object:` only if the R object is not
+  named `design`.
 
 ## Tiny API
 
@@ -24,7 +26,7 @@ make_design("2.1", b = 0.5)          # book alias
 get_args("two_arm_trial")
 get_code("two_arm_trial")             # simple make_design() + full source
 run_shiny()
-install_library_dependencies()        # Imports + Shiny Suggests (+ Zero from GitHub)
+install_library_dependencies()        # Imports + Shiny Suggests + YAML packages: (+ Zero from GitHub)
 copy_library_shiny("path/to/app")     # standalone Shiny folder for the server
 ```
 

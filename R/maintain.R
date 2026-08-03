@@ -256,3 +256,95 @@ refresh_library <- function(sims = 100, designs = NULL) {
 
   invisible(list(index = index, audit = audit, previews = previews))
 }
+
+#' Copy directory contents (Dropbox-friendly retries)
+#' @noRd
+copy_dir_contents <- function(from, to, tries = 6L, sleep = 1) {
+  from <- normalizePath(from, winslash = "/", mustWork = TRUE)
+  to <- normalizePath(to, winslash = "/", mustWork = FALSE)
+  dir.create(to, recursive = TRUE, showWarnings = FALSE)
+
+  last_err <- NULL
+  for (i in seq_len(tries)) {
+    ok <- tryCatch({
+      old <- list.files(to, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+      if (length(old)) unlink(old, recursive = TRUE, force = TRUE)
+      items <- list.files(from, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+      if (!length(items)) stop("Build directory is empty: ", from, call. = FALSE)
+      copied <- vapply(
+        items,
+        function(it) isTRUE(file.copy(it, to, recursive = TRUE, overwrite = TRUE)),
+        logical(1)
+      )
+      if (!all(copied)) stop("Some files failed to copy into ", to, call. = FALSE)
+      TRUE
+    }, error = function(e) {
+      last_err <<- e
+      FALSE
+    })
+    if (isTRUE(ok)) return(invisible(to))
+    Sys.sleep(sleep)
+  }
+  stop(
+    "Could not refresh ", to, " after ", tries, " tries",
+    if (!is.null(last_err)) paste0(": ", conditionMessage(last_err)) else ".",
+    "\nIf the path is under Dropbox, pause sync briefly and retry.",
+    call. = FALSE
+  )
+}
+
+#' Build the pkgdown site (Dropbox-safe)
+#'
+#' On Windows Dropbox folders, `pkgdown::build_site()` / `build_article()` often
+#' fail in `xml2::write_html()` with "Invalid argument" / "Error closing file"
+#' when writing directly into `docs/`. This helper builds into a local temp
+#' directory, then copies the result into `docs/`.
+#'
+#' @param pkg Package root. Default: [find_package_root()] via
+#'   `options(ResearchDesigns.root=...)` or the current working directory.
+#' @param ... Passed to [pkgdown::build_site()] (for example `devel = TRUE`).
+#' @return Invisibly, the path to `docs/`.
+#' @export
+#' @examples
+#' \dontrun{
+#' options(ResearchDesigns.root = "C:/path/to/ResearchDesigns")
+#' build_docs()
+#' }
+build_docs <- function(pkg = NULL, ...) {
+  if (!requireNamespace("pkgdown", quietly = TRUE)) {
+    stop('Install pkgdown first: install.packages("pkgdown")', call. = FALSE)
+  }
+  if (is.null(pkg)) {
+    pkg <- tryCatch(find_package_root(), error = function(e) getwd())
+  }
+  pkg <- normalizePath(pkg, winslash = "/", mustWork = TRUE)
+  dest <- file.path(pkg, "docs")
+
+  tmp_root <- tempfile("ResearchDesigns-docs-")
+  dir.create(tmp_root, recursive = TRUE)
+  on.exit(unlink(tmp_root, recursive = TRUE, force = TRUE), add = TRUE)
+
+  # Keep knit/pandoc intermediates off the synced drive too
+  old_tmpdir <- Sys.getenv("TMPDIR", unset = "")
+  old_tmp <- Sys.getenv("TMP", unset = "")
+  old_temp <- Sys.getenv("TEMP", unset = "")
+  Sys.setenv(TMPDIR = tmp_root, TMP = tmp_root, TEMP = tmp_root)
+  on.exit({
+    if (nzchar(old_tmpdir)) Sys.setenv(TMPDIR = old_tmpdir) else Sys.unsetenv("TMPDIR")
+    if (nzchar(old_tmp)) Sys.setenv(TMP = old_tmp) else Sys.unsetenv("TMP")
+    if (nzchar(old_temp)) Sys.setenv(TEMP = old_temp) else Sys.unsetenv("TEMP")
+  }, add = TRUE)
+
+  message("Building pkgdown site under ", tmp_root)
+  pkgdown::build_site(
+    pkg = pkg,
+    override = list(destination = tmp_root),
+    ...
+  )
+
+  message("Copying into ", dest)
+  copy_dir_contents(tmp_root, dest)
+  writeLines(character(0), file.path(dest, ".nojekyll"))
+  message("Done. Commit docs/ and push for GitHub Pages.")
+  invisible(dest)
+}
