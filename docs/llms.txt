@@ -1,0 +1,168 @@
+# ResearchDesigns
+
+A prototype for a library of declared designs using DeclareDesignZero.
+
+**Versioning:** start at 0.1.0 and bump slowly.
+
+## Idea
+
+- Each design is a self-contained `.R` file under `inst/designs/`.
+- The **design object** is the source of truth for editable parameters.
+- Optional YAML frontmatter adds labels, categories, keywords, book
+  aliases, and `params:` tip strings.
+- Missing metadata falls back to sensible defaults (`category: Other`,
+  `object: design`, id = filename stem).
+
+## Tiny API
+
+``` r
+
+list_designs()
+make_design("two_arm_trial")
+make_design("two_arm_trial", b = 0.5)
+make_design("2.1", b = 0.5)          # book alias
+get_args("two_arm_trial")
+get_code("two_arm_trial")             # simple make_design() + full source
+run_shiny()
+install_library_dependencies()        # Imports + Shiny Suggests (+ Zero from GitHub)
+copy_library_shiny("path/to/app")     # standalone Shiny folder for the server
+```
+
+Maintainer one-stop:
+
+``` r
+
+refresh_library()   # index + audit + bake previews (sims = 100)
+```
+
+## Server deploy
+
+``` r
+
+remotes::install_github("macartan/ResearchDesigns")
+ResearchDesigns::install_library_dependencies()
+ResearchDesigns::copy_library_shiny("/srv/shiny-server/researchdesigns")
+```
+
+Point Shiny Server at that folder. `local.R` there is never overwritten
+on re-copy. \## Minimal design file
+
+YAML is optional. This is enough:
+
+``` r
+
+b <- 0
+design <-
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + b) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+```
+
+Save as `inst/designs/my_design.R`. Parameters are discovered from the
+design; `redesign()` /
+[`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md)
+use those names.
+
+## Classic DeclareDesign vs DeclareDesignZero
+
+**Classic DeclareDesign** (and DesignLibrary) often paired a *designer
+function* with a design: parameters lived on the designer, and tools
+like `expand_design(two_arm_designer, N = c(50, 100))` swept that
+function. Reproducible code was glued on with special extraction
+(`{{{ }}}`).
+
+**DeclareDesignZero** keeps the same declaration verbs (`declare_model`,
+`+`, `diagnose_design`, …) but treats the **declared design itself** as
+redesignable. Free symbols in the design (e.g. `b`, `tau`) are found on
+the object, so:
+
+``` r
+
+designs <- redesign(design, tau = c(0.1, 0.3, 0.5))
+diagnose_design(designs, sims = 100)
+```
+
+needs no designer and no DesignLibrary-style gluing. This package is
+built for that model.
+
+## Contributor checklist
+
+See
+[`contributor_checklist()`](https://macartan.github.io/ResearchDesigns/reference/contributor_checklist.md)
+or run
+[`audit_designs()`](https://macartan.github.io/ResearchDesigns/reference/audit_designs.md)
+/
+[`refresh_library()`](https://macartan.github.io/ResearchDesigns/reference/refresh_library.md).
+
+# Package index
+
+## Discover
+
+Browse the design library.
+
+- [`list_designs()`](https://macartan.github.io/ResearchDesigns/reference/list_designs.md)
+  : List designs in the library
+- [`design_info()`](https://macartan.github.io/ResearchDesigns/reference/design_info.md)
+  : Design metadata (YAML + defaults)
+
+## Build & inspect
+
+Load designs, change parameters, and read code.
+
+- [`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md)
+  : Build a design, optionally with redesigned parameters
+
+- [`get_args()`](https://macartan.github.io/ResearchDesigns/reference/get_args.md)
+  : Editable parameters for a design
+
+- [`get_code()`](https://macartan.github.io/ResearchDesigns/reference/get_code.md)
+  :
+
+  Code for a design: simple
+  [`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md)
+  call and/or full source
+
+- [`design_profile()`](https://macartan.github.io/ResearchDesigns/reference/design_profile.md)
+  :
+
+  Character profile for a design (same prose as printing
+  [`design_info()`](https://macartan.github.io/ResearchDesigns/reference/design_info.md))
+
+## Shiny
+
+Browse designs interactively and deploy a standalone app folder.
+
+- [`run_shiny()`](https://macartan.github.io/ResearchDesigns/reference/run_shiny.md)
+  : Launch the ResearchDesigns Shiny browser
+- [`copy_library_shiny()`](https://macartan.github.io/ResearchDesigns/reference/copy_library_shiny.md)
+  : Copy the bundled Shiny app to a standalone folder
+- [`install_library_dependencies()`](https://macartan.github.io/ResearchDesigns/reference/install_library_dependencies.md)
+  : Install ResearchDesigns system dependencies
+- [`get_preview()`](https://macartan.github.io/ResearchDesigns/reference/get_preview.md)
+  : Load a baked diagnosis preview
+- [`has_preview()`](https://macartan.github.io/ResearchDesigns/reference/has_preview.md)
+  : Whether a baked preview exists for a design
+
+## Maintain
+
+Index, audit, bake previews, and refresh the library.
+
+- [`refresh_library()`](https://macartan.github.io/ResearchDesigns/reference/refresh_library.md)
+  : Refresh the library (maintainer one-stop)
+- [`make_index()`](https://macartan.github.io/ResearchDesigns/reference/make_index.md)
+  : Build an in-memory index of all designs
+- [`audit_designs()`](https://macartan.github.io/ResearchDesigns/reference/audit_designs.md)
+  : Audit one or more designs
+- [`bake_previews()`](https://macartan.github.io/ResearchDesigns/reference/bake_previews.md)
+  : Bake compact diagnosis previews into inst/previews
+- [`contributor_checklist()`](https://macartan.github.io/ResearchDesigns/reference/contributor_checklist.md)
+  : Contributor checklist for a design
+
+# Articles
+
+### Getting started
+
+- [ResearchDesigns: a library of declared
+  designs](https://macartan.github.io/ResearchDesigns/articles/ResearchDesigns.md):

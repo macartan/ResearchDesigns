@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 inst/doc
-docs
-*.html
+# Knit side-products in vignettes/ (pkgdown site under docs/ is committed)
+vignettes/*.html
+vignettes/*.Rmd.bak
 .DS_Store
