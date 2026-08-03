@@ -1,0 +1,74 @@
+# ResearchDesigns
+
+A prototype for a library of declared designs using DeclareDesignZero.
+
+**Versioning:** start at 0.1.0 and bump slowly.
+
+## Idea
+
+- Each design is a self-contained `.R` file under `inst/designs/`.
+- The **design object** is the source of truth for editable parameters.
+- Optional YAML frontmatter adds labels, categories, keywords, book aliases, `packages:` extras, and `params:` tip strings.
+- YAML is optional. With no header: id = filename stem, label = humanized id, `category: Other`, object name `design`, `include_in_shiny: true`. Set `object:` only if the R object is not named `design`.
+
+## Tiny API
+
+```r
+list_designs()
+make_design("two_arm_trial")
+make_design("two_arm_trial", b = 0.5)
+make_design("2.1", b = 0.5)          # book alias
+get_args("two_arm_trial")
+get_code("two_arm_trial")             # simple make_design() + full source
+run_shiny()
+install_library_dependencies()        # Imports + Shiny Suggests + YAML packages: (+ Zero from GitHub)
+copy_library_shiny("path/to/app")     # standalone Shiny folder for the server
+```
+
+Maintainer one-stop:
+
+```r
+refresh_library()   # index + audit + bake previews (sims = 100)
+```
+
+## Server deploy
+
+```r
+remotes::install_github("macartan/ResearchDesigns")
+ResearchDesigns::install_library_dependencies()
+ResearchDesigns::copy_library_shiny("/srv/shiny-server/researchdesigns")
+```
+
+Point Shiny Server at that folder. `local.R` there is never overwritten on re-copy.
+## Minimal design file
+
+YAML is optional. This is enough:
+
+```r
+b <- 0
+design <-
+  declare_model(N = 100, U = rnorm(N), Y_Z_0 = U, Y_Z_1 = U + b) +
+  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +
+  declare_assignment(Z = complete_ra(N)) +
+  declare_measurement(Y = Y_Z_1 * Z + Y_Z_0 * (1 - Z)) +
+  declare_estimator(Y ~ Z, inquiry = "ATE")
+```
+
+Save as `inst/designs/my_design.R`. Parameters are discovered from the design; `redesign()` / `make_design()` use those names.
+
+## Classic DeclareDesign vs DeclareDesignZero
+
+**Classic DeclareDesign** (and DesignLibrary) often paired a *designer function* with a design: parameters lived on the designer, and tools like `expand_design(two_arm_designer, N = c(50, 100))` swept that function. Reproducible code was glued on with special extraction (`{{{ }}}`).
+
+**DeclareDesignZero** keeps the same declaration verbs (`declare_model`, `+`, `diagnose_design`, …) but treats the **declared design itself** as redesignable. Free symbols in the design (e.g. `b`, `tau`) are found on the object, so:
+
+```r
+designs <- redesign(design, tau = c(0.1, 0.3, 0.5))
+diagnose_design(designs, sims = 100)
+```
+
+needs no designer and no DesignLibrary-style gluing. This package is built for that model.
+
+## Contributor checklist
+
+See `contributor_checklist()` or run `audit_designs()` / `refresh_library()`.

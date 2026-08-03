@@ -1,0 +1,49 @@
+url: https://macartan.github.io/ResearchDesigns/
+template:
+  bootstrap: 5
+home:
+  title: ResearchDesigns
+  description: A library of declared designs (DeclareDesignZero), with a small API and bundled Shiny browser.
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: ResearchDesigns overview
+        href: articles/ResearchDesigns.html
+articles:
+- title: Getting started
+  contents:
+  - ResearchDesigns
+reference:
+- title: Discover
+  desc: Browse the design library.
+  contents:
+  - list_designs
+  - design_info
+- title: Build & inspect
+  desc: Load designs, change parameters, and read code.
+  contents:
+  - make_design
+  - get_args
+  - get_code
+  - design_profile
+- title: Shiny
+  desc: Browse designs interactively and deploy a standalone app folder.
+  contents:
+  - run_shiny
+  - copy_library_shiny
+  - install_library_dependencies
+  - get_preview
+  - has_preview
+- title: Maintain
+  desc: Index, audit, bake previews, and refresh the library.
+  contents:
+  - refresh_library
+  - make_index
+  - audit_designs
+  - bake_previews
+  - contributor_checklist

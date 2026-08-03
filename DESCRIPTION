@@ -1,0 +1,46 @@
+Package: ResearchDesigns
+Title: A Library of Declared Designs
+Version: 0.1.0
+Authors@R: person("Macartan", "Humphreys",
+                  email = "macartan.humphreys@wzb.eu",
+                  role = c("aut", "cre"))
+Description: A lightweight library of research designs declared with
+    DeclareDesignZero. Designs live as self-contained R files; editable
+    parameters are read from the design itself. Optional YAML metadata
+    adds labels, categories, tips, and book aliases. Includes maintainer
+    tools to index, audit, and bake small diagnosis previews, plus a
+    bundled Shiny browser (`run_shiny()`).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    DeclareDesignZero,
+    fabricatrZero,
+    randomizr,
+    estimatr,
+    yaml,
+    utils,
+    stats
+Suggests:
+    shiny,
+    bslib,
+    htmltools,
+    markdown,
+    DT,
+    ggplot2,
+    remotes,
+    pkgdown,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    withr,
+    margins,
+    broom
+Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+URL: https://github.com/macartan/ResearchDesigns, https://macartan.github.io/ResearchDesigns/
+BugReports: https://github.com/macartan/ResearchDesigns/issues
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

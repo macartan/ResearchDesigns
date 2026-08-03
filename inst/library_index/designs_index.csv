@@ -1,0 +1,13 @@
+"id","alias","label","category","keywords","packages","description","include_in_shiny","file"
+"logit_probit_ols","11.5","Logit, probit, or OLS?","rdss","experiment, binary, logit, probit, margins","margins, broom","Compare OLS, logit, and probit estimates of an ATE on a binary outcome. Marginal effects for GLM estimators use the margins package.
+",TRUE,"logit_probit_ols.R"
+"pate_with_sampling","4.1","PATE with sampling","template","sampling, experiment, PATE","","Sample from a population, then randomly assign treatment. Inquiry is the population average treatment effect (PATE).
+",TRUE,"pate_with_sampling.R"
+"two_arm_trial",NA,"Simple two-arm trial","template","experiment, two-arm","","Simple two-arm trial with complete random assignment.
+",TRUE,"two_arm_trial.R"
+"two_arm_trial_rdss","2.1","Two-arm trial from RDSS","rdss","experiment, two-arm, introduction","","Two-arm trial design from RDSS chapter 2. Illustrates MIDA with a simple sampling and complete random assignment step.
+",TRUE,"two_arm_trial_rdss.R"
+"two_arm_with_blocks",NA,"Two-arm trial with blocks","rdss","experiment, two-arm, blocking","","Simple two arm design with block randomization
+",TRUE,"two_arm_with_blocks.R"
+"two_arm_with_blocks_rdss","2.2","Two-arm trial with blocks from RDSS","rdss","experiment, two-arm, blocking, introduction","","Chapter 2 design that uses background information (history) for blocked assignment and a blocked difference-in-means estimator.
+",TRUE,"two_arm_with_blocks_rdss.R"

@@ -1,0 +1,121 @@
+---
+title: "ResearchDesigns: a library of declared designs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ResearchDesigns: a library of declared designs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+# Prefer source designs when developing from the package tree / Dropbox checkout
+if (dir.exists("../inst/designs")) {
+  options(ResearchDesigns.root = normalizePath("..", winslash = "/"))
+}
+library(ResearchDesigns)
+library(DeclareDesignZero)
+library(ggplot2)
+```
+
+# The idea
+
+To contribute a design to **ResearchDesigns** you just have to place a self-contained `.R` file in `inst/designs/`. That file declares a design and, optionally, a short YAML header. Once it is there, the design can be loaded, modified, diagnosed, and browsed in the bundled Shiny app.
+
+
+# What a design file looks like
+
+Here is the starter design `two_arm_trial`.
+
+<details>
+<summary><code>inst/designs/two_arm_trial.R</code></summary>
+
+```{r, echo = FALSE, results = "asis"}
+path <- system.file("designs", "two_arm_trial.R", package = "ResearchDesigns")
+if (!nzchar(path) || !file.exists(path)) {
+  root <- tryCatch(
+    ResearchDesigns:::find_package_root(),
+    error = function(e) NULL
+  )
+  if (!is.null(root)) {
+    path <- file.path(root, "inst", "designs", "two_arm_trial.R")
+  }
+}
+code <- if (file.exists(path)) {
+  paste(readLines(path, warn = FALSE), collapse = "\n")
+} else {
+  "# two_arm_trial.R not found in this build"
+}
+cat("```r\n", code, "\n```\n", sep = "")
+```
+
+</details>
+
+The header is optional. At minimum you need a design object (by default named `design`). Parameter tips are plain strings under `params:`; quote keys such as `"N"` and `"b"`.
+
+As soon as that file sits in `inst/designs/`, it is available to `make_design()`, `get_args()`, `get_code()`, the maintainer audits, and `run_shiny()`.
+
+# What designs are included?
+
+```{r list-designs}
+list_designs(discover_params = FALSE)
+```
+
+Call `list_designs()` to see ids, aliases, labels, packages, and (with `discover_params = TRUE`) modifiable parameters. Use `design_info("two_arm_trial")` for the English profile of one design, or `as.data.frame(list_designs())` for the full table.
+
+# Use ResearchDesigns to make a design
+
+```{r make-default}
+my_design <- make_design("two_arm_trial")
+my_design
+```
+
+
+# Change parameters and simulate
+
+Parameters are taken from the design itself. Pass new values to `make_design()`; under the hood this uses DeclareDesign's `redesign()`.
+
+```{r make-and-simulate}
+make_design("two_arm_trial", b = 0.3) |>
+  simulate_design(sims = 2)
+```
+
+You can now change all parameters in one go.
+
+```{r make-and-simulate-grid}
+make_design("two_arm_trial", b = c(0, .3, .6), N = c(20, 1000)) |>
+  simulate_design(sims = 100) |>
+  ggplot(aes(estimate, p.value, color = factor(b))) + 
+  geom_point()  + facet_grid(N~.)
+```
+
+# Browse in Shiny
+
+```{r shiny, eval = FALSE}
+run_shiny()
+```
+
+The app opens on a searchable library table. Click a row to open the design, expand its profile, run it once, diagnose it, or redesign parameters. For a server deploy: install the package, run `install_library_dependencies()`, then `copy_library_shiny(dest)`.
+
+# Maintainer tools
+
+A short set of helpers keeps the library honest:
+
+- `contributor_checklist()` — what a design file should satisfy
+- `audit_designs()` — load each design and check that YAML `params:` names match redesignable objects
+- `bake_previews()` — write compact diagnosis previews (`sims = 100` by default) into `inst/previews/`
+- `refresh_library()` — index, audit, and bake in one step
+
+Run maintainer helpers from the package source tree, or set:
+
+```{r maintainer-root, eval = FALSE}
+options(ResearchDesigns.root = "C:/path/to/ResearchDesigns")
+refresh_library()
+```
+
+That is the whole loop: drop in a design file, use it from R or Shiny, and refresh the library when you change the set.
