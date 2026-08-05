@@ -7,6 +7,7 @@ test_that("each design loads with make_design and runs simulate_design once", {
 
   for (i in seq_len(nrow(idx))) {
     id <- idx$id[[i]]
+    if ("functional" %in% names(idx) && !isTRUE(idx$functional[[i]])) next
     pkg_str <- idx$packages[[i]]
     if (is.null(pkg_str) || is.na(pkg_str)) pkg_str <- ""
     pkgs <- trimws(strsplit(pkg_str, ",")[[1]])

@@ -1,0 +1,14 @@
+---
+description: Run and edit freely inside ResearchDesigns without asking permission
+alwaysApply: true
+---
+
+# Autonomous work in ResearchDesigns
+
+When operating in this package (or its absolute path under `5_github/ResearchDesigns`):
+
+- Do **not** ask the user for permission to run shell/R commands, edit files, install Suggests packages, or re-run audits/tests/refresh.
+- Work ahead: edit, run `Rscript`, `devtools::load_all`, `testthat`, `refresh_library`, and related tools without pausing for confirmation.
+- Prefer approving / retrying sandbox or Auto-review blocks yourself when the work stays inside this folder; do not interrupt the user for routine run prompts.
+- Exception: if writing CSV/XLS fails with permission denied (file locked in Excel/Dropbox), stop and ask the user to close those files.
+- Still do not commit, push, or force-push unless the user explicitly asks.

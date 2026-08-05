@@ -12,10 +12,22 @@ default_meta <- function(id) {
     category = "Other",
     keywords = character(0),
     packages = character(0),
+    diagnosands = character(0),
     include_in_shiny = TRUE,
+    functional = TRUE,
     book_link = NA_character_,
     params = list()
   )
+}
+
+#' Coerce YAML truthy / falsey scalars
+#' @noRd
+yaml_is_true <- function(x, default = FALSE) {
+  if (is.null(x) || length(x) == 0L || (length(x) == 1L && is.na(x))) {
+    return(isTRUE(default))
+  }
+  if (is.logical(x)) return(isTRUE(x[[1]]))
+  identical(tolower(trimws(as.character(x)[[1]])), "true")
 }
 
 #' Split optional YAML frontmatter from an R design file
@@ -91,9 +103,19 @@ merge_meta <- function(defaults, parsed, id_guess) {
   if (!is.null(parsed$category)) out$category <- as.character(parsed$category)[[1]]
   if (!is.null(parsed$keywords)) out$keywords <- as_chr(parsed$keywords)
   if (!is.null(parsed$packages)) out$packages <- as_chr(parsed$packages)
+  if (!is.null(parsed$diagnosands)) out$diagnosands <- normalize_diagnosands(parsed$diagnosands)
+  # functional: false parks a design (unavailable deps, WIP). Also accept `function:`.
+  if (!is.null(parsed$functional)) {
+    out$functional <- yaml_is_true(parsed$functional, default = TRUE)
+  } else if (!is.null(parsed[["function"]])) {
+    out$functional <- yaml_is_true(parsed[["function"]], default = TRUE)
+  }
   if (!is.null(parsed$include_in_shiny)) {
-    out$include_in_shiny <- isTRUE(parsed$include_in_shiny) ||
-      identical(tolower(as.character(parsed$include_in_shiny)[[1]]), "true")
+    out$include_in_shiny <- yaml_is_true(parsed$include_in_shiny, default = TRUE)
+  }
+  # Disabled designs stay out of Shiny even if include_in_shiny was true
+  if (!isTRUE(out$functional)) {
+    out$include_in_shiny <- FALSE
   }
   if (!is.null(parsed$book_link)) {
     out$book_link <- as.character(parsed$book_link)[[1]]
@@ -116,6 +138,38 @@ yaml_load_design_meta <- function(yaml_text) {
     "bool#no" = function(x) x
   )
   yaml::yaml.load(yaml_text, handlers = handlers)
+}
+
+#' Coerce YAML diagnosands to a character vector
+#'
+#' Accepts a YAML list (`[bias, power]`), a scalar (`bias`), or a
+#' comma/semicolon-separated string (`"rmse, bias"`). Tokens starting with
+#' `-` (e.g. `-bias`) are kept as exclusions for the display list.
+#' @noRd
+normalize_diagnosands <- function(x) {
+  if (is.null(x) || (length(x) == 1L && is.na(x))) return(character(0))
+  ch <- as_chr(x)
+  parts <- unlist(strsplit(ch, "[,;]+"), use.names = FALSE)
+  parts <- trimws(as.character(parts))
+  parts[nzchar(parts)]
+}
+
+#' Split diagnosand tokens into preferred and excluded names
+#'
+#' Positive tokens (e.g. `rmse`) are preferred defaults. Tokens that start
+#' with `-` (e.g. `-bias`) exclude that diagnosand from the display list.
+#' @param tokens Character vector from YAML `diagnosands:`.
+#' @return List with `prefer` and `exclude` character vectors.
+#' @noRd
+split_diagnosand_tokens <- function(tokens) {
+  tokens <- as.character(tokens %||% character(0))
+  tokens <- trimws(tokens)
+  tokens <- tokens[nzchar(tokens)]
+  is_excl <- startsWith(tokens, "-")
+  prefer <- tokens[!is_excl]
+  exclude <- sub("^-", "", tokens[is_excl])
+  exclude <- exclude[nzchar(exclude)]
+  list(prefer = prefer, exclude = unique(exclude))
 }
 
 #' Coerce YAML params to a named list of tip strings

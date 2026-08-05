@@ -14,16 +14,21 @@ navbar:
       menu:
       - text: ResearchDesigns overview
         href: articles/ResearchDesigns.html
+      - text: Contributing a design
+        href: articles/contributing.html
 articles:
 - title: Getting started
   contents:
   - ResearchDesigns
+  - contributing
 reference:
 - title: Discover
   desc: Browse the design library.
   contents:
   - list_designs
   - design_info
+  - preferred_diagnosands
+  - excluded_diagnosands
 - title: Build & inspect
   desc: Load designs, change parameters, and read code.
   contents:
@@ -48,3 +53,5 @@ reference:
   - bake_previews
   - build_docs
   - contributor_checklist
+  - param_coverage_report
+  - param_coverage_gaps

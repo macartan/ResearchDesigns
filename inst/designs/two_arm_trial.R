@@ -6,10 +6,12 @@ keywords: [experiment, two-arm]
 description: >
   Simple two-arm trial with complete random assignment.
 params:
-  "N": "Sample size"
-  "b": "Treatment effect"
+  "N": "Number of units (sample or population size)"
+  "b": "Treatment effect (outcome scale)"
+diagnosands: [bias, power]
 include_in_shiny: true
 ---
+
 
 N <- 1000
 b <- 0.2

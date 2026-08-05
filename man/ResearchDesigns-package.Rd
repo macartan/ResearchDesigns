@@ -9,7 +9,8 @@
 Lightweight library of research designs declared with DeclareDesignZero.
 Designs live as self-contained R files under \verb{inst/designs/}. Editable
 parameters are read from the design object; optional YAML metadata adds
-labels, categories, book aliases, and \verb{params:} tip strings.
+labels, categories, book aliases, \verb{diagnosands:} display defaults, and
+\verb{params:} tip strings.
 }
 \section{Workflow}{
 

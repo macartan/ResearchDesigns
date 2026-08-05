@@ -9,11 +9,13 @@ description: >
   Marginal effects for GLM estimators use the margins package.
 packages: [margins, broom]
 params:
-  "N": "Sample size"
-  "b": "Treatment effect on the outcome probability scale"
+  "N": "Number of units (sample or population size)"
+  "b": "Treatment effect (outcome scale)"
+diagnosands: rmse, bias
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num5
 include_in_shiny: true
 ---
+
 
 N <- 100
 b <- 0.2

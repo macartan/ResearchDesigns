@@ -4,17 +4,35 @@
 \alias{audit_designs}
 \title{Audit one or more designs}
 \usage{
-audit_designs(designs = NULL, sims = NULL)
+audit_designs(
+  designs = NULL,
+  sims = NULL,
+  write_report = TRUE,
+  report_dir = NULL
+)
 }
 \arguments{
 \item{designs}{Character vector of ids/aliases, or \code{NULL} for all.}
 
 \item{sims}{If not \code{NULL}, run a short \code{diagnose_design()} with this many sims.}
+
+\item{write_report}{If \code{TRUE} (default), write CSV + markdown under \verb{tools/}.}
+
+\item{report_dir}{Directory for reports; default \verb{tools/} under package root.}
 }
 \value{
 An object of class \code{research_designs_audit}.
 }
 \description{
 Checks that each file loads, exposes a design object, and that any YAML
-\verb{params:} names are a subset of the design's modifiable parameters.
+\verb{params:} names are a subset of the design's modifiable parameters. Also
+records pre-design objects that are used by the design but missing from the
+redesignable parameter list (see \code{\link[=param_coverage_report]{param_coverage_report()}}).
+}
+\details{
+Failures are collected per design and (by default) written to
+\code{tools/audit_report.csv}, \code{tools/audit_report.md}, and
+\code{tools/audit_report.txt} (FAIL/SKIP first, then OK) under the package root
+via \code{\link[=write_audit_report]{write_audit_report()}}. Soft notes (undocumented params, coverage gaps)
+do not mark a design as failed.
 }

@@ -8,7 +8,7 @@ A prototype for a library of declared designs using DeclareDesignZero.
 
 - Each design is a self-contained `.R` file under `inst/designs/`.
 - The **design object** is the source of truth for editable parameters.
-- Optional YAML frontmatter adds labels, categories, keywords, book aliases, `packages:` extras, and `params:` tip strings.
+- Optional YAML frontmatter adds labels, categories, keywords, book aliases, `packages:` extras, `diagnosands:` defaults for display, and `params:` tip strings.
 - YAML is optional. With no header: id = filename stem, label = humanized id, `category: Other`, object name `design`, `include_in_shiny: true`. Set `object:` only if the R object is not named `design`.
 
 ## Tiny API
@@ -58,6 +58,13 @@ design <-
 ```
 
 Save as `inst/designs/my_design.R`. Parameters are discovered from the design; `redesign()` / `make_design()` use those names.
+
+Optional YAML can set preferred diagnosands for the Shiny Diagnosis and Redesign tabs (falls back to bias and power):
+
+```yaml
+diagnosands: [rmse, bias]
+# or: diagnosands: rmse, bias
+```
 
 ## Classic DeclareDesign vs DeclareDesignZero
 

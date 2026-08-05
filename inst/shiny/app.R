@@ -20,48 +20,111 @@ for (cfg in c("deploy-options.R", "local.R")) {
 
 PKGDOWN_URL <- "https://macartan.github.io/ResearchDesigns/"
 GITHUB_URL <- "https://github.com/macartan/ResearchDesigns"
+DECLAREDESIGN_URL <- "https://declaredesign.org/"
+BOOK_URL <- "https://book.declaredesign.org/"
 
 has_bslib <- requireNamespace("bslib", quietly = TRUE)
 has_dt <- requireNamespace("DT", quietly = TRUE)
 has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
 
-app_css <- "
-.rd-wrap { width: 90%; max-width: 1600px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
-.rd-wrap-library { width: 94%; max-width: none; }
-.rd-hero h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
-.rd-hero p { color: #5c6b73; margin-bottom: 1rem; }
-.rd-card {
-  background: #fff; border: 1px solid #e6ebe8; border-radius: 12px;
-  padding: 1rem 1.15rem; margin-bottom: 1rem;
-  box-shadow: 0 1px 2px rgba(16, 40, 36, 0.04);
+# Colors from Research Design in the Social Sciences cover + DeclareDesign logo/site
+# Cover: magenta title #C41E7A, navy body text #142F5E; logo blue #2860F6; site #2780e3
+DD_NAVY <- "#142F5E"
+DD_MAGENTA <- "#C41E7A"
+DD_BLUE <- "#2860F6"
+DD_PRIMARY <- "#2780e3"
+DD_LINK <- "#1d48a8"
+DD_SOFT <- "#d4e6f9"
+DD_SOFT2 <- "#eaf2fc"
+DD_SOFT_MAGENTA <- "#f9e8f1"
+DD_BODY <- "#343a40"
+DD_MUTED <- "#6c757d"
+DD_BORDER <- "#dee2e6"
+DD_CODE_BG <- "#f4f7fb"
+
+app_css <- sprintf("
+:root {
+  --dd-navy: %s;
+  --dd-magenta: %s;
+  --dd-blue: %s;
+  --dd-primary: %s;
+  --dd-link: %s;
+  --dd-soft: %s;
+  --dd-soft2: %s;
+  --dd-soft-magenta: %s;
+  --dd-body: %s;
+  --dd-muted: %s;
+  --dd-border: %s;
+  --dd-code-bg: %s;
 }
-.rd-muted { color: #6c757d; font-size: 0.92rem; }
+body { color: var(--dd-body); background: #f8f9fa; }
+.navbar, .navbar.navbar-default, .navbar.bg-primary {
+  background-color: #fff !important;
+  border-bottom: 1px solid var(--dd-border);
+  box-shadow: 0 1px 0 rgba(20, 47, 94, 0.04);
+}
+.navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-nav > li > a {
+  color: var(--dd-navy) !important;
+}
+.navbar .nav-link:hover, .navbar .navbar-nav > li > a:hover {
+  color: var(--dd-magenta) !important;
+}
+.navbar .nav-link.active, .navbar .active > .nav-link,
+.navbar .navbar-nav > .active > a {
+  color: var(--dd-magenta) !important;
+  font-weight: 650;
+  box-shadow: inset 0 -2px 0 var(--dd-magenta);
+}
+.rd-brand {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  font-weight: 700; color: var(--dd-navy) !important;
+  letter-spacing: -0.01em;
+}
+.rd-brand img { display: block; height: 1.65rem; width: auto; }
+.rd-wrap { width: 90%%; max-width: 1600px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
+.rd-wrap-library { width: 94%%; max-width: none; }
+.rd-hero h1 { font-size: 1.75rem; margin-bottom: 0.25rem; color: var(--dd-navy); }
+.rd-hero p { color: var(--dd-muted); margin-bottom: 1rem; }
+.rd-card {
+  background: #fff; border: 1px solid var(--dd-border); border-radius: 10px;
+  padding: 1rem 1.15rem; margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(20, 47, 94, 0.04);
+}
+.rd-muted { color: var(--dd-muted); font-size: 0.92rem; }
 .rd-code {
-  background: #f4f7f5; border-radius: 8px; padding: 0.85rem 1rem;
+  background: var(--dd-code-bg); border: 1px solid var(--dd-border);
+  border-radius: 8px; padding: 0.85rem 1rem; margin: 0 0 1rem;
   font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto;
+  color: var(--dd-navy); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.rd-code-oneline {
+  white-space: pre; overflow-x: auto;
 }
 .rd-profile {
-  background: #f8faf9; border-left: 4px solid #2c6e63; border-radius: 0 8px 8px 0;
-  padding: 0.85rem 1rem; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.84rem; line-height: 1.45;
+  background: var(--dd-soft2); border-left: 4px solid var(--dd-magenta);
+  border-radius: 0 8px 8px 0;
+  padding: 0.85rem 1rem; white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84rem; line-height: 1.45; color: var(--dd-body);
 }
 .rd-chip {
-  display: inline-block; background: #e8f2ef; color: #1f4f47;
+  display: inline-block; background: var(--dd-soft-magenta); color: var(--dd-navy);
   border-radius: 999px; padding: 0.15rem 0.55rem; margin: 0.1rem 0.2rem 0.1rem 0;
   font-size: 0.78rem; font-weight: 600;
 }
 details.rd-details {
-  border: 1px solid #d9e3df; border-radius: 10px; padding: 0.65rem 0.9rem; background: #fff;
+  border: 1px solid var(--dd-border); border-radius: 10px;
+  padding: 0.65rem 0.9rem; background: #fff;
 }
 details.rd-details > summary {
-  cursor: pointer; font-weight: 600; list-style: none;
+  cursor: pointer; font-weight: 600; list-style: none; color: var(--dd-navy);
 }
 details.rd-details > summary::-webkit-details-marker { display: none; }
 details.rd-details > summary::before {
   content: '\\25B8  ';
   display: inline-block;
   margin-right: 0.15rem;
-  color: #2c6e63;
+  color: var(--dd-magenta);
 }
 details.rd-details[open] > summary::before { content: '\\25BE  '; }
 details.rd-details[open] > summary { margin-bottom: 0.65rem; }
@@ -69,9 +132,10 @@ details.rd-details[open] > summary { margin-bottom: 0.65rem; }
   display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
   justify-content: space-between; margin-bottom: 1rem;
 }
+.rd-selected-banner h3 { color: var(--dd-navy); }
 .rd-param-grid {
   display: grid;
-  grid-template-columns: minmax(6rem, 14%) minmax(1.25rem, 1.75rem) 1fr;
+  grid-template-columns: minmax(6rem, 14%%) minmax(1.25rem, 1.75rem) 1fr;
   gap: 0.15rem 0.45rem;
   align-items: center;
   margin: 0.35rem 0 0.5rem;
@@ -86,30 +150,126 @@ details.rd-details[open] > summary { margin-bottom: 0.65rem; }
   padding-bottom: 0.25rem;
   min-height: calc(1.4em + 0.5rem);
 }
-.rd-param-name { font-weight: 650; color: #1f4f47; font-size: 0.92rem; }
+.rd-param-name { font-weight: 650; color: var(--dd-navy); font-size: 0.92rem; }
 .rd-tip {
   display: inline-flex; align-items: center; justify-content: center;
   width: 1.05rem; height: 1.05rem; border-radius: 999px;
-  background: #e8f2ef; color: #2c6e63; font-size: 0.68rem; font-weight: 700;
+  background: var(--dd-soft-magenta); color: var(--dd-magenta); font-size: 0.68rem; font-weight: 700;
   cursor: help; user-select: none;
 }
 .rd-tip-empty { visibility: hidden; }
 .rd-help-box {
-  background: #f7faf8; border: 1px solid #dde8e3; border-radius: 8px;
-  padding: 0.45rem 0.7rem; font-size: 0.86rem; color: #445;
+  background: var(--dd-soft2); border: 1px solid var(--dd-border); border-radius: 8px;
+  padding: 0.45rem 0.7rem; font-size: 0.86rem; color: var(--dd-body);
   margin-bottom: 0.45rem;
 }
-.rd-help-box code { background: #eef3f1; padding: 0.05rem 0.3rem; border-radius: 4px; }
-.rd-error { color: #833; font-size: 0.9rem; margin: 0.35rem 0; }
+.rd-help-box code { background: #fff; padding: 0.05rem 0.3rem; border-radius: 4px; color: var(--dd-navy); }
+.rd-error { color: #ff0039; font-size: 0.9rem; margin: 0.35rem 0; }
+.rd-design-link {
+  color: var(--dd-blue); font-weight: 600; text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.rd-design-link:hover { color: var(--dd-magenta); border-bottom-color: var(--dd-magenta); }
+.rd-label-cell { white-space: nowrap; }
+.rd-permalink {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-left: 0.35rem; vertical-align: middle;
+  color: var(--dd-muted); text-decoration: none;
+  border-radius: 4px; padding: 0.1rem;
+  border-bottom: none !important; font-weight: 400;
+}
+.rd-permalink svg { width: 0.95rem; height: 0.95rem; display: block; }
+.rd-permalink:hover { color: var(--dd-magenta); background: var(--dd-soft); }
+.rd-share-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem; color: var(--dd-muted); word-break: break-all;
+}
+.rd-share-row {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-top: 0.35rem; font-size: 0.85rem; color: var(--dd-muted);
+}
+.rd-steps { counter-reset: rd-step; list-style: none; padding-left: 0; margin: 0.5rem 0 1rem; }
+.rd-steps > li {
+  position: relative; padding: 0.65rem 0.75rem 0.65rem 3rem;
+  margin-bottom: 0.55rem; background: var(--dd-soft2); border: 1px solid var(--dd-border);
+  border-radius: 10px;
+}
+.rd-steps > li::before {
+  counter-increment: rd-step; content: counter(rd-step);
+  position: absolute; left: 0.7rem; top: 0.7rem;
+  width: 1.55rem; height: 1.55rem; border-radius: 999px;
+  background: var(--dd-magenta); color: #fff; font-size: 0.82rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.rd-steps > li strong { color: var(--dd-navy); }
+.rd-yaml-table { width: 100%%; border-collapse: collapse; font-size: 0.9rem; }
+.rd-yaml-table th, .rd-yaml-table td {
+  text-align: left; vertical-align: top; padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--dd-border);
+}
+.rd-yaml-table th { color: var(--dd-navy); font-weight: 650; background: var(--dd-soft-magenta); }
+.rd-yaml-table code { background: var(--dd-soft); padding: 0.05rem 0.3rem; border-radius: 4px; }
+.btn-primary {
+  background-color: var(--dd-magenta) !important;
+  border-color: var(--dd-magenta) !important;
+}
+.btn-primary:hover {
+  background-color: var(--dd-navy) !important;
+  border-color: var(--dd-navy) !important;
+}
+.btn-outline-secondary {
+  color: var(--dd-navy) !important;
+  border-color: var(--dd-border) !important;
+}
+.btn-outline-secondary:hover {
+  background: var(--dd-soft-magenta) !important;
+  color: var(--dd-magenta) !important;
+}
+a { color: var(--dd-blue); }
+a:hover { color: var(--dd-magenta); }
+.rd-cover {
+  float: right; width: 140px; max-width: 32%%; margin: 0 0 1rem 1rem;
+  border: 1px solid var(--dd-border); border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(20, 47, 94, 0.12);
+}
 #library_table table.dataTable tbody tr { cursor: pointer; }
-#library_table table.dataTable tbody tr:hover { background-color: #eef6f3 !important; }
-"
+#library_table table.dataTable tbody tr:hover { background-color: var(--dd-soft-magenta) !important; }
+#library_table table.dataTable thead th {
+  color: var(--dd-navy); border-bottom-color: var(--dd-magenta) !important;
+}
+", DD_NAVY, DD_MAGENTA, DD_BLUE, DD_PRIMARY, DD_LINK, DD_SOFT, DD_SOFT2, DD_SOFT_MAGENTA, DD_BODY, DD_MUTED, DD_BORDER, DD_CODE_BG)
+
+brand_title <- function() {
+  tags$span(
+    class = "rd-brand",
+    tags$img(src = "dd-logo.svg", alt = "DeclareDesign", height = "28"),
+    "ResearchDesigns"
+  )
+}
+
+app_head <- tags$head(
+  tags$link(rel = "icon", type = "image/svg+xml", href = "dd-logo.svg"),
+  tags$link(rel = "apple-touch-icon", href = "dd-icon.png"),
+  tags$meta(name = "theme-color", content = DD_MAGENTA),
+  tags$title("ResearchDesigns")
+)
 
 theme_obj <- if (has_bslib) {
   bslib::bs_theme(
     version = 5,
     bootswatch = "flatly",
-    primary = "#2c6e63",
+    primary = DD_MAGENTA,
+    secondary = DD_NAVY,
+    success = "#3fb618",
+    info = DD_PRIMARY,
+    warning = "#f0ad4e",
+    danger = "#ff0039",
+    "body-color" = DD_BODY,
+    "link-color" = DD_BLUE,
+    "navbar-bg" = "#ffffff",
+    "navbar-light-color" = DD_NAVY,
+    "navbar-light-active-color" = DD_MAGENTA,
+    "navbar-light-hover-color" = DD_MAGENTA,
     "font-size-base" = "0.98rem"
   )
 } else {
@@ -165,9 +325,9 @@ design_panel <- function() {
     div(
       class = "rd-card",
       h4("One-line"),
-      tags$pre(class = "rd-code", textOutput("simple_code", inline = TRUE)),
+      uiOutput("simple_code_ui"),
       h4("Full declaration"),
-      tags$pre(class = "rd-code", textOutput("full_code", inline = TRUE)),
+      uiOutput("full_code_ui"),
       h4("Editable parameters"),
       tableOutput("args_table"),
       br(),
@@ -188,6 +348,7 @@ diagnosis_panel <- function() {
       actionButton("run_diagnosis", "Run diagnosis", class = "btn-primary"),
       br(), br(),
       h4("Diagnosands"),
+      uiOutput("diag_diagnosand_ui"),
       tableOutput("diagnosis_table"),
       if (has_ggplot2) plotOutput("diagnosis_plot", height = "320px") else NULL
     )
@@ -222,14 +383,33 @@ redesign_panel <- function() {
 about_panel <- function() {
   div(
     class = "rd-card",
-    h3("About ResearchDesigns"),
-    p("A library of declared designs built on DeclareDesignZero. Designs are self-contained R files; editable parameters come from the design object."),
-    tags$ul(
-      tags$li(tags$a(href = PKGDOWN_URL, target = "_blank", "Package documentation (pkgdown)")),
-      tags$li(tags$a(href = GITHUB_URL, target = "_blank", "GitHub repository")),
-      tags$li(tags$a(href = "https://declaredesign.org/", target = "_blank", "DeclareDesign"))
+    tags$a(
+      href = BOOK_URL, target = "_blank",
+      tags$img(
+        src = "rdss-cover.png",
+        class = "rd-cover",
+        alt = "Research Design in the Social Sciences"
+      )
     ),
-    p(class = "rd-muted",
+    h3("About ResearchDesigns"),
+    p(
+      tags$img(src = "dd-logo.svg", alt = "DeclareDesign", height = "36", style = "vertical-align: middle; margin-right: 0.5rem;"),
+      "A library of declared designs in the DeclareDesign ecosystem. Designs are self-contained R files; editable parameters come from the design object."
+    ),
+    p(
+      class = "rd-muted",
+      "Built around declaration, diagnosis, and redesign — see ",
+      tags$a(href = BOOK_URL, target = "_blank", "Research Design in the Social Sciences"),
+      "."
+    ),
+    tags$ul(
+      tags$li(tags$a(href = DECLAREDESIGN_URL, target = "_blank", "DeclareDesign")),
+      tags$li(tags$a(href = BOOK_URL, target = "_blank", "Research Design in the Social Sciences (book)")),
+      tags$li(tags$a(href = PKGDOWN_URL, target = "_blank", "Package documentation (pkgdown)")),
+      tags$li(tags$a(href = paste0(PKGDOWN_URL, "articles/contributing.html"), target = "_blank", "Contributing guide")),
+      tags$li(tags$a(href = GITHUB_URL, target = "_blank", "GitHub repository"))
+    ),
+    p(class = "rd-muted", style = "clear: both;",
       paste0(
         "Package version ",
         tryCatch(as.character(utils::packageVersion("ResearchDesigns")), error = function(e) "?"),
@@ -239,30 +419,205 @@ about_panel <- function() {
   )
 }
 
+contribute_yaml_tips <- function() {
+  data.frame(
+    Field = c(
+      "id", "alias", "label", "description", "category", "keywords",
+      "packages", "diagnosands", "params", "book_link", "include_in_shiny", "functional", "object"
+    ),
+    Tip = c(
+      "Substantive snake_case name; should match the filename stem (e.g. two_arm_trial).",
+      "Optional book reference string (e.g. \"2.1\"). Quoted if it looks numeric.",
+      "Short human-readable title shown in the library.",
+      "One or two sentences on what the design does. Use YAML > for a folded block.",
+      "Grouping label. Use rdss for book designs; template for teaching starters; otherwise a short group name.",
+      "List of search terms, e.g. [experiment, blocking].",
+      "Extra R packages the design needs beyond DeclareDesignZero, e.g. [margins, broom].",
+      "Preferred display diagnosands, e.g. [rmse, bias]. Prefix with - to hide one (rmse, -bias, power).",
+      "Map parameter names to tip strings. Always quote keys: \"N\": \"Sample size\". Names must match redesignable parameters.",
+      "URL to a book section or external docs.",
+      "true (default) or false. Set false for incomplete or heavy designs.",
+      "true (default) or false. Set false to park a design (e.g. unavailable packages); skips audit/smoke/install and forces include_in_shiny false.",
+      "Name of the design object in the file. Omit if the object is named design."
+    ),
+    stringsAsFactors = FALSE
+  )
+}
+
+contribute_panel <- function() {
+  tips <- contribute_yaml_tips()
+  tip_rows <- lapply(seq_len(nrow(tips)), function(i) {
+    tags$tr(
+      tags$td(tags$code(tips$Field[[i]])),
+      tags$td(tips$Tip[[i]])
+    )
+  })
+
+  tagList(
+    div(
+      class = "rd-card",
+      h3("Contribute a design"),
+      p(
+        "You contribute ", tags$strong("one self-contained R file"),
+        " in ", tags$code("inst/designs/"),
+        ". That file holds the declared design and an optional YAML header. ",
+        "Nothing else is required for the library, API, or this browser to pick it up."
+      ),
+      p(
+        class = "rd-muted",
+        "Full write-up: ",
+        tags$a(
+          href = paste0(PKGDOWN_URL, "articles/contributing.html"),
+          target = "_blank",
+          "Contributing a design (vignette)"
+        ),
+        "."
+      )
+    ),
+    div(
+      class = "rd-card",
+      h4("Workflow"),
+      tags$ol(
+        class = "rd-steps",
+        tags$li(
+          tags$strong("Fork"),
+          " the repository on GitHub and clone your fork locally."
+        ),
+        tags$li(
+          tags$strong("Add your file"),
+          " under ", tags$code("inst/designs/"),
+          ". Name it after the design id (e.g. ", tags$code("my_design.R"),
+          "). Declare an object named ", tags$code("design"),
+          " (or set ", tags$code("object:"), " in YAML). Keep the file self-contained—no ",
+          tags$code("source()"), " of other designs."
+        ),
+        tags$li(
+          tags$strong("Refresh"),
+          " so index, audit, and preview artifacts are built for your design:",
+          tags$pre(
+            class = "rd-code",
+            "options(ResearchDesigns.root = \"/path/to/your/ResearchDesigns\")\nrefresh_library()"
+          )
+        ),
+        tags$li(
+          tags$strong("Check"),
+          " locally. At minimum:",
+          tags$pre(
+            class = "rd-code",
+            "list_designs()\nmake_design(\"my_design\")\naudit_designs()\nrun_shiny()"
+          ),
+          "Confirm your design appears in the Library, opens cleanly, and diagnosis/redesign behave as you expect."
+        ),
+        tags$li(
+          tags$strong("Pull request"),
+          " from your fork to ",
+          tags$a(href = GITHUB_URL, target = "_blank", "macartan/ResearchDesigns"),
+          ". Keep the PR focused on the new (or updated) design file and any packages it needs."
+        )
+      )
+    ),
+    div(
+      class = "rd-card",
+      h4("Minimal file"),
+      p("YAML is optional. This is enough:"),
+      tags$pre(
+        class = "rd-code",
+        paste(
+          "b <- 0.2",
+          "design <-",
+          "  declare_model(N = 100, U = rnorm(N), potential_outcomes(Y ~ b * Z + U)) +",
+          "  declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +",
+          "  declare_assignment(Z = complete_ra(N)) +",
+          "  declare_measurement(Y = reveal_outcomes(Y ~ Z)) +",
+          "  declare_estimator(Y ~ Z, inquiry = \"ATE\")",
+          sep = "\n"
+        )
+      ),
+      p(
+        class = "rd-muted",
+        "Parameters are discovered from the design object. Tip strings and library metadata live in optional YAML."
+      )
+    ),
+    div(
+      class = "rd-card",
+      h4("YAML fields"),
+      p("Optional frontmatter between ", tags$code("---"), " lines at the top of the file:"),
+      tags$table(
+        class = "rd-yaml-table",
+        tags$thead(tags$tr(tags$th("Field"), tags$th("Tip"))),
+        tags$tbody(tip_rows)
+      ),
+      tags$details(
+        class = "rd-details",
+        style = "margin-top: 0.85rem;",
+        tags$summary("Example YAML header"),
+        tags$pre(
+          class = "rd-code",
+          paste(
+            "---",
+            "id: two_arm_trial",
+            "label: Simple two-arm trial",
+            "category: template",
+            "keywords: [experiment, two-arm]",
+            "description: >",
+            "  Simple two-arm trial with complete random assignment.",
+            "params:",
+            "  \"N\": \"Sample size\"",
+            "  \"b\": \"Treatment effect\"",
+            "diagnosands: [bias, power]",
+            "include_in_shiny: true",
+            "functional: true",
+            "---",
+            sep = "\n"
+          )
+        )
+      )
+    ),
+    div(
+      class = "rd-card",
+      h4("Checklist"),
+      tags$ul(
+        lapply(ResearchDesigns::contributor_checklist(), function(item) tags$li(item))
+      ),
+      p(
+        class = "rd-muted",
+        "In R: ", tags$code("contributor_checklist()"), ", ",
+        tags$code("audit_designs()"), ", ",
+        tags$code("refresh_library()"), "."
+      )
+    )
+  )
+}
+
 ui_body <- if (has_bslib) {
   bslib::page_navbar(
-    title = "ResearchDesigns",
+    title = brand_title(),
     id = "main_nav",
     theme = theme_obj,
-    header = tags$style(HTML(app_css)),
+    header = tagList(app_head, tags$style(HTML(app_css))),
     bslib::nav_panel("Library", div(class = "rd-wrap rd-wrap-library", library_panel())),
     bslib::nav_panel("Design", div(class = "rd-wrap", design_panel())),
     bslib::nav_panel("Diagnosis", div(class = "rd-wrap", diagnosis_panel())),
     bslib::nav_panel("Redesign", div(class = "rd-wrap", redesign_panel())),
     bslib::nav_spacer(),
+    bslib::nav_panel("Contribute", div(class = "rd-wrap", contribute_panel())),
     bslib::nav_panel("About", div(class = "rd-wrap", about_panel())),
+    bslib::nav_item(tags$a(href = DECLAREDESIGN_URL, target = "_blank", "DeclareDesign")),
+    bslib::nav_item(tags$a(href = BOOK_URL, target = "_blank", "Book")),
     bslib::nav_item(tags$a(href = PKGDOWN_URL, target = "_blank", "Docs"))
   )
 } else {
   fluidPage(
+    app_head,
     tags$style(HTML(app_css)),
-    titlePanel("ResearchDesigns"),
+    titlePanel(brand_title()),
     tabsetPanel(
       id = "main_nav",
       tabPanel("Library", div(class = "rd-wrap rd-wrap-library", library_panel())),
       tabPanel("Design", div(class = "rd-wrap", design_panel())),
       tabPanel("Diagnosis", div(class = "rd-wrap", diagnosis_panel())),
       tabPanel("Redesign", div(class = "rd-wrap", redesign_panel())),
+      tabPanel("Contribute", div(class = "rd-wrap", contribute_panel())),
       tabPanel("About", div(class = "rd-wrap", about_panel()))
     )
   )
@@ -394,27 +749,100 @@ server <- function(input, output, session) {
     df
   })
 
+  # Inline SVG link icon for deep links / share
+  permalink_svg <- paste0(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">',
+    '<path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>',
+    '<path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"/>',
+    "</svg>"
+  )
+
   library_display <- reactive({
     df <- filtered_idx()
+    ids <- as.character(df$id)
+    labels <- as.character(df$label %||% ids)
+    label_html <- vapply(seq_along(ids), function(i) {
+      id <- ids[[i]]
+      href <- paste0("?design=", utils::URLencode(id, reserved = TRUE))
+      sprintf(
+        paste0(
+          '<span class="rd-label-cell">%s',
+          '<a class="rd-permalink" href="%s" title="Link to this design" ',
+          'aria-label="Link to design %s">%s</a></span>'
+        ),
+        html_escape(labels[[i]]),
+        href,
+        html_escape(id),
+        permalink_svg
+      )
+    }, character(1))
     data.frame(
-      label = df$label,
-      id = df$id,
+      label = if (has_dt) label_html else labels,
       alias = df$alias,
       category = df$category,
       params = df$params,
       packages = df$packages,
-      stringsAsFactors = FALSE
+      stringsAsFactors = FALSE,
+      .id_key = ids,
+      check.names = FALSE
     )
   })
 
-  go_to_design <- function(id) {
+  resolve_design_key <- function(key) {
+    key <- trimws(as.character(key %||% "")[[1]])
+    if (!nzchar(key)) return(NA_character_)
+    df <- as.data.frame(idx_all)
+    if (key %in% df$id) return(key)
+    als <- as.character(df$alias %||% "")
+    hit <- which(!is.na(als) & nzchar(als) & als == key)
+    if (length(hit)) return(as.character(df$id[[hit[[1]]]]))
+    tryCatch({
+      info <- ResearchDesigns::design_info(key)
+      as.character(info$id[[1]])
+    }, error = function(e) NA_character_)
+  }
+
+  html_escape <- function(x) {
+    x <- as.character(x)
+    x <- gsub("&", "&amp;", x, fixed = TRUE)
+    x <- gsub("<", "&lt;", x, fixed = TRUE)
+    x <- gsub(">", "&gt;", x, fixed = TRUE)
+    x <- gsub("\"", "&quot;", x, fixed = TRUE)
+    x
+  }
+
+  design_query <- function(id) {
+    paste0("?design=", utils::URLencode(as.character(id), reserved = TRUE))
+  }
+
+  design_share_url <- function(id) {
+    proto <- session$clientData$url_protocol %||% "http:"
+    host <- session$clientData$url_hostname %||% "127.0.0.1"
+    path <- session$clientData$url_pathname %||% "/"
+    port <- session$clientData$url_port %||% ""
+    port_bit <- if (nzchar(as.character(port)) && !port %in% c("80", "443", "")) {
+      paste0(":", port)
+    } else {
+      ""
+    }
+    paste0(proto, "//", host, port_bit, path, design_query(id))
+  }
+
+  go_to_design <- function(id, update_url = TRUE) {
     if (is.null(id) || is.na(id) || !nzchar(id)) return()
+    id <- resolve_design_key(id)
+    if (is.na(id) || !nzchar(id)) return()
     selected_id(id)
     live_diag(NULL)
     mod_diag(NULL)
     mod_last_ranges(character(0))
     mod_status("")
     run_once_txt("")
+    updateSelectInput(session, "diag_diagnosands", selected = character(0))
+    updateSelectInput(session, "mod_diagnosands", selected = character(0))
+    if (isTRUE(update_url)) {
+      shiny::updateQueryString(design_query(id), mode = "replace", session = session)
+    }
     if (has_bslib) {
       bslib::nav_select("main_nav", selected = "Design", session = session)
     } else {
@@ -422,12 +850,29 @@ server <- function(input, output, session) {
     }
   }
 
+  # Deep link: ?design=<id-or-alias> opens that design on load / URL change
+  observe({
+    search <- session$clientData$url_search
+    q <- shiny::parseQueryString(search %||% "")
+    key <- q$design %||% q$id
+    if (is.null(key) || !nzchar(as.character(key)[[1]])) return()
+    id <- resolve_design_key(key)
+    if (is.na(id)) return()
+    cur <- selected_id()
+    if (is.na(cur) || !identical(cur, id)) {
+      go_to_design(id, update_url = FALSE)
+    }
+  })
+
   if (has_dt) {
     output$library_table <- DT::renderDT({
+      disp <- library_display()
+      show <- disp[, c("label", "alias", "category", "params", "packages"), drop = FALSE]
       DT::datatable(
-        library_display(),
+        show,
         selection = "single",
         rownames = FALSE,
+        escape = FALSE,
         class = "display nowrap",
         options = list(
           pageLength = 100,
@@ -438,7 +883,7 @@ server <- function(input, output, session) {
           ordering = TRUE,
           columnDefs = list(
             list(width = "30%", targets = 0),  # label
-            list(width = "14%", targets = 1),  # id
+            list(width = "14%", targets = 1),  # id (linked)
             list(width = "7%", targets = 2),   # alias
             list(width = "12%", targets = 3),  # category
             list(width = "20%", targets = 4),  # params
@@ -458,7 +903,7 @@ server <- function(input, output, session) {
     })
   } else {
     output$library_table_basic <- renderTable({
-      library_display()
+      library_display()[, c("label", "alias", "category", "params", "packages"), drop = FALSE]
     })
   }
 
@@ -466,7 +911,7 @@ server <- function(input, output, session) {
     rows <- input$library_table_rows_selected
     df <- library_display()
     if (length(rows) && rows[[1]] <= nrow(df)) {
-      go_to_design(df$id[[rows[[1]]]])
+      go_to_design(df$.id_key[[rows[[1]]]])
     }
   }, ignoreNULL = TRUE)
 
@@ -476,6 +921,7 @@ server <- function(input, output, session) {
       return(div(class = "rd-card", p("Open a design from the Library tab.")))
     }
     info <- ResearchDesigns::design_info(id)
+    share <- tryCatch(design_share_url(id), error = function(e) design_query(id))
     div(
       class = "rd-selected-banner",
       div(
@@ -485,6 +931,14 @@ server <- function(input, output, session) {
           id,
           if (!is.null(info$alias) && !is.na(info$alias)) paste0(' · alias "', info$alias, '"') else NULL,
           " · ", info$category %||% "Other"
+        ),
+        tags$a(
+          href = design_query(id),
+          class = "rd-permalink",
+          style = "margin-top: 0.35rem;",
+          title = share,
+          `aria-label` = paste("Shareable link to", id),
+          HTML(permalink_svg)
         )
       ),
       actionButton("back_library", "Back to library", class = "btn-outline-secondary btn-sm")
@@ -495,6 +949,7 @@ server <- function(input, output, session) {
   output$selected_header_diag <- renderUI(selected_header_ui())
 
   go_to_library <- function() {
+    shiny::updateQueryString("", mode = "replace", session = session)
     if (has_bslib) {
       bslib::nav_select("main_nav", selected = "Library", session = session)
     } else {
@@ -553,16 +1008,18 @@ server <- function(input, output, session) {
     ResearchDesigns::design_profile(id)
   })
 
-  output$simple_code <- renderText({
+  output$simple_code_ui <- renderUI({
     id <- selected_id()
     req(!is.na(id), nzchar(id))
-    ResearchDesigns::get_code(id, style = "simple")
+    code <- ResearchDesigns::get_code(id, style = "simple")
+    tags$pre(class = "rd-code rd-code-oneline", code)
   })
 
-  output$full_code <- renderText({
+  output$full_code_ui <- renderUI({
     id <- selected_id()
     req(!is.na(id), nzchar(id))
-    ResearchDesigns::get_code(id, style = "full")
+    code <- ResearchDesigns::get_code(id, style = "full")
+    tags$pre(class = "rd-code", code)
   })
 
   output$args_table <- renderTable({
@@ -652,12 +1109,45 @@ server <- function(input, output, session) {
     NULL
   }
 
-  default_diagnosands <- function(all_names) {
-    all_names <- unique(as.character(all_names))
-    prefer <- c("bias", "power")
-    hit <- all_names[tolower(all_names) %in% prefer]
+  default_diagnosands <- function(all_names, design_id = NULL) {
+    all_names <- available_diagnosands(all_names, design_id)
+    prefer <- character(0)
+    if (!is.null(design_id) && length(design_id) && !is.na(design_id) && nzchar(as.character(design_id)[[1]])) {
+      prefer <- tryCatch(
+        ResearchDesigns::preferred_diagnosands(as.character(design_id)[[1]]),
+        error = function(e) character(0)
+      )
+    }
+    if (!length(prefer)) prefer <- c("bias", "power")
+    hit <- character(0)
+    for (p in prefer) {
+      m <- all_names[tolower(all_names) == tolower(p)]
+      if (length(m)) hit <- c(hit, m[[1]])
+    }
+    hit <- unique(hit)
     if (length(hit)) return(hit)
     utils::head(all_names, 2L)
+  }
+
+  available_diagnosands <- function(all_names, design_id = NULL) {
+    all_names <- unique(as.character(all_names))
+    exclude <- character(0)
+    if (!is.null(design_id) && length(design_id) && !is.na(design_id) && nzchar(as.character(design_id)[[1]])) {
+      exclude <- tryCatch(
+        ResearchDesigns::excluded_diagnosands(as.character(design_id)[[1]]),
+        error = function(e) character(0)
+      )
+    }
+    if (length(exclude)) {
+      all_names <- all_names[!tolower(all_names) %in% tolower(exclude)]
+    }
+    all_names
+  }
+
+  filter_diagnosands <- function(df, selected) {
+    if (is.null(df) || !nrow(df) || !"diagnosand" %in% names(df)) return(df)
+    if (is.null(selected) || !length(selected)) return(df)
+    df[as.character(df$diagnosand) %in% selected, , drop = FALSE]
   }
 
   y_value_col <- function(df) {
@@ -754,9 +1244,10 @@ server <- function(input, output, session) {
       p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = .y))
     }
     if (has_ci) {
-      p <- p + ggplot2::geom_errorbarh(
+      p <- p + ggplot2::geom_errorbar(
         ggplot2::aes(xmin = conf.low, xmax = conf.high),
-        height = 0.25,
+        orientation = "y",
+        width = 0.25,
         position = pd,
         na.rm = TRUE
       )
@@ -789,13 +1280,43 @@ server <- function(input, output, session) {
     0.4
   }
 
+  output$diag_diagnosand_ui <- renderUI({
+    df <- diagnosand_df(current_diagnosis())
+    if (is.null(df) || !"diagnosand" %in% names(df)) return(NULL)
+    all_d <- available_diagnosands(unique(as.character(df$diagnosand)), selected_id())
+    if (!length(all_d)) return(NULL)
+    sel <- input$diag_diagnosands
+    if (is.null(sel) || !length(intersect(sel, all_d))) {
+      sel <- default_diagnosands(all_d, selected_id())
+    }
+    selectInput(
+      "diag_diagnosands",
+      NULL,
+      choices = all_d,
+      selected = sel,
+      multiple = TRUE,
+      width = "100%"
+    )
+  })
+
   output$diagnosis_table <- renderTable({
-    diagnosand_df(current_diagnosis())
+    df <- diagnosand_df(current_diagnosis())
+    if (is.null(df) || !nrow(df) || !"diagnosand" %in% names(df)) return(df)
+    all_d <- available_diagnosands(unique(as.character(df$diagnosand)), selected_id())
+    sel <- input$diag_diagnosands
+    if (is.null(sel) || !length(sel)) sel <- default_diagnosands(all_d, selected_id())
+    filter_diagnosands(df, sel)
   })
 
   if (has_ggplot2) {
     output$diagnosis_plot <- renderPlot({
       df <- diagnosand_df(current_diagnosis())
+      if (!is.null(df) && nrow(df) && "diagnosand" %in% names(df)) {
+        all_d <- available_diagnosands(unique(as.character(df$diagnosand)), selected_id())
+        sel <- input$diag_diagnosands
+        if (is.null(sel) || !length(sel)) sel <- default_diagnosands(all_d, selected_id())
+        df <- filter_diagnosands(df, sel)
+      }
       if (is.null(df) || !nrow(df)) {
         plot.new()
         text(0.5, 0.5, "No diagnosis to plot yet.")
@@ -852,9 +1373,12 @@ server <- function(input, output, session) {
   output$mod_diagnosand_ui <- renderUI({
     df <- diagnosand_df(mod_diag())
     if (is.null(df) || !"diagnosand" %in% names(df)) return(NULL)
-    all_d <- unique(as.character(df$diagnosand))
+    all_d <- available_diagnosands(unique(as.character(df$diagnosand)), selected_id())
+    if (!length(all_d)) return(NULL)
     sel <- input$mod_diagnosands
-    if (is.null(sel) || !length(intersect(sel, all_d))) sel <- default_diagnosands(all_d)
+    if (is.null(sel) || !length(intersect(sel, all_d))) {
+      sel <- default_diagnosands(all_d, selected_id())
+    }
     selectInput(
       "mod_diagnosands",
       "Diagnosands",
@@ -945,9 +1469,9 @@ server <- function(input, output, session) {
     df <- diagnosand_df(mod_diag())
     if (is.null(df) || !nrow(df)) return(NULL)
     if ("diagnosand" %in% names(df)) {
-      all_d <- unique(as.character(df$diagnosand))
+      all_d <- available_diagnosands(unique(as.character(df$diagnosand)), selected_id())
       sel <- input$mod_diagnosands
-      if (is.null(sel) || !length(sel)) sel <- default_diagnosands(all_d)
+      if (is.null(sel) || !length(sel)) sel <- default_diagnosands(all_d, selected_id())
       sel <- intersect(sel, all_d)
       if (length(sel)) df <- df[as.character(df$diagnosand) %in% sel, , drop = FALSE]
     }

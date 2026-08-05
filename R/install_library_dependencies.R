@@ -1,9 +1,10 @@
 #' GitHub sources for Imports not on CRAN
 #' @noRd
 github_package_sources <- function() {
+  # fabricatrZero before DeclareDesignZero (DD imports fabricatr)
   c(
-    DeclareDesignZero = "DeclareDesign/DeclareDesignZero",
-    fabricatrZero = "DeclareDesign/fabricatrZero"
+    fabricatrZero = "DeclareDesign/fabricatrZero",
+    DeclareDesignZero = "DeclareDesign/DeclareDesignZero"
   )
 }
 
@@ -44,6 +45,7 @@ design_declared_packages <- function() {
   pkgs <- unlist(lapply(files, function(path) {
     m <- tryCatch(parse_design_file(path)$meta, error = function(e) NULL)
     if (is.null(m)) return(character(0))
+    if (!isTRUE(m$functional %||% TRUE)) return(character(0))
     p <- m$packages %||% character(0)
     as.character(p[nzchar(as.character(p))])
   }), use.names = FALSE)
@@ -95,6 +97,10 @@ install_library_dependencies <- function(
 
   # Never try to install ourselves this way
   pkgs <- setdiff(pkgs, "ResearchDesigns")
+
+  # fabricatrZero before DeclareDesignZero (DD imports fabricatr); others independent
+  prefer <- c("fabricatrZero", "DeclareDesignZero", "randomizr", "estimatr")
+  pkgs <- unique(c(intersect(prefer, pkgs), setdiff(pkgs, prefer)))
 
   gh <- github_package_sources()
   already_ok <- character(0)

@@ -1,0 +1,14 @@
+---
+id: bootstrapped
+alias: "9.5"
+label: bootstrapped
+category: rdss
+description: >
+  Bootstrapped standard errors. (chapter 9).
+book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/choosing-answer-strategy.html#def-ch9num5
+include_in_shiny: true
+---
+
+design <-
+  declare_model(data = resample_data(clingingsmith_etal)) +
+  declare_estimator(views ~ success, .method = difference_in_means)

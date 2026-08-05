@@ -6,11 +6,12 @@ keywords: [experiment, two-arm, blocking]
 description: >
   Simple two arm design with block randomization
 params:
-  "b": "Treatment effect"
+  "b": "Treatment effect (outcome scale)"
+  "block_size": "Units per block"
   "k": "Number of blocks"
-  "block_size": Size of block (constant)
 include_in_shiny: true
 ---
+
 
 k <- 3
 block_size <- 10
@@ -37,4 +38,3 @@ design <-
     blocks = blocks,
     inquiry = "ATE"
   )
-

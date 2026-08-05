@@ -189,5 +189,7 @@ ensure_packages_attached <- function(pkgs) {
 #' Core stack always available when loading designs
 #' @noRd
 core_packages <- function() {
-  c("DeclareDesignZero", "fabricatrZero", "randomizr", "estimatr")
+  # fabricatrZero before DeclareDesignZero (DD imports fabricatr);
+  # randomizr and estimatr are independent
+  c("fabricatrZero", "DeclareDesignZero", "randomizr", "estimatr")
 }

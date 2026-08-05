@@ -2,19 +2,20 @@
 id: pate_with_sampling
 alias: "4.1"
 label: PATE with sampling
-category: template
+category: rdss
 keywords: [sampling, experiment, PATE]
 description: >
   Sample from a population, then randomly assign treatment. Inquiry is the
   population average treatment effect (PATE).
 params:
-  "N": "Population size"
-  "n": "Sample size"
-  "b": "Treatment effect"
-  "prob": "Assignment probability"
+  "N": "Number of units (sample or population size)"
+  "n": "Sample size drawn from the population (when N is population size)"
+  "b": "Treatment effect (outcome scale)"
+  "prob": "Probability of assignment to treatment"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaring-designs.html
 include_in_shiny: true
 ---
+
 
 N <- 100
 n <- 50

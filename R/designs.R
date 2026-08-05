@@ -111,6 +111,7 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
     category = character(0),
     keywords = character(0),
     include_in_shiny = logical(0),
+    functional = logical(0),
     file = character(0),
     stringsAsFactors = FALSE
   )
@@ -128,7 +129,7 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
     }
 
     params <- NA_character_
-    if (isTRUE(discover_params)) {
+    if (isTRUE(discover_params) && isTRUE(m$functional)) {
       params <- tryCatch({
         design <- eval_design(parsed)
         pnames <- discover_design_params(design)$name
@@ -148,6 +149,7 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
       category = as.character(m$category %||% "Other")[[1]],
       keywords = paste(m$keywords %||% character(0), collapse = ", "),
       include_in_shiny = isTRUE(m$include_in_shiny),
+      functional = isTRUE(m$functional),
       file = basename(path),
       stringsAsFactors = FALSE
     )
@@ -220,7 +222,7 @@ print.research_designs_list <- function(x, ..., n = 5L) {
 #' Design metadata (YAML + defaults)
 #'
 #' Printing uses short English prose. The underlying list is unchanged for
-#' programmatic use (`info$id`, `info$params`, etc.).
+#' programmatic use (`info$id`, `info$params`, `info$diagnosands`, etc.).
 #'
 #' @param design Design id or book alias.
 #' @return A named list of metadata with class `research_designs_info`.
@@ -229,6 +231,41 @@ design_info <- function(design) {
   if (length(design) > 1L) design <- design[[1L]]
   meta <- resolve_design(design)$meta
   structure(meta, class = c("research_designs_info", "list"))
+}
+
+#' Preferred diagnosands declared in a design's YAML
+#'
+#' Reads optional `diagnosands:` from the design frontmatter (for example
+#' `diagnosands: [rmse, bias]` or `diagnosands: rmse, -bias, power`).
+#' Positive names are preferred defaults for diagnosis and redesign display.
+#' Names prefixed with `-` (e.g. `-bias`) are exclusions and are omitted here;
+#' see [excluded_diagnosands()].
+#'
+#' @param design Design id or book alias.
+#' @return Character vector (possibly empty).
+#' @export
+#' @examples
+#' \dontrun{
+#' preferred_diagnosands("two_arm_trial")
+#' }
+preferred_diagnosands <- function(design) {
+  if (length(design) > 1L) design <- design[[1L]]
+  meta <- resolve_design(design)$meta
+  split_diagnosand_tokens(meta$diagnosands)$prefer
+}
+
+#' Diagnosands excluded from display by YAML
+#'
+#' Tokens like `-bias` in `diagnosands:` remove that name from the Shiny
+#' diagnosand list for the design.
+#'
+#' @param design Design id or book alias.
+#' @return Character vector (possibly empty).
+#' @export
+excluded_diagnosands <- function(design) {
+  if (length(design) > 1L) design <- design[[1L]]
+  meta <- resolve_design(design)$meta
+  split_diagnosand_tokens(meta$diagnosands)$exclude
 }
 
 #' @export
@@ -284,6 +321,18 @@ print.research_designs_info <- function(x, ...) {
   pkgs <- pkgs[nzchar(as.character(pkgs))]
   if (length(pkgs)) {
     cat("\nExtra packages required:\n  ", paste(pkgs, collapse = ", "), "\n", sep = "")
+  }
+
+  dgs <- x$diagnosands %||% character(0)
+  dgs <- dgs[nzchar(as.character(dgs))]
+  if (length(dgs)) {
+    parts <- split_diagnosand_tokens(dgs)
+    if (length(parts$prefer)) {
+      cat("\nPreferred diagnosands:\n  ", paste(parts$prefer, collapse = ", "), "\n", sep = "")
+    }
+    if (length(parts$exclude)) {
+      cat("\nExcluded diagnosands:\n  ", paste(parts$exclude, collapse = ", "), "\n", sep = "")
+    }
   }
 
   link <- x$book_link

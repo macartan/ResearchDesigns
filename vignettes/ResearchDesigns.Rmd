@@ -27,6 +27,8 @@ library(ggplot2)
 
 To contribute a design to **ResearchDesigns** you just have to place a self-contained `.R` file in `inst/designs/`. That file declares a design and, optionally, a short YAML header. Once it is there, the design can be loaded, modified, diagnosed, and browsed in the bundled Shiny app.
 
+For the contribution workflow (fork, add file, refresh, check, pull request), see the vignette *Contributing a design* or the Shiny **Contribute** tab.
+
 
 # What a design file looks like
 
@@ -118,4 +120,4 @@ options(ResearchDesigns.root = "C:/path/to/ResearchDesigns")
 refresh_library()
 ```
 
-That is the whole loop: drop in a design file, use it from R or Shiny, and refresh the library when you change the set.
+That is the whole loop: drop in a design file, use it from R or Shiny, and refresh the library when you change the set. Step-by-step contribution guidance is in `vignette("contributing", package = "ResearchDesigns")`.

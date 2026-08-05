@@ -8,12 +8,13 @@ description: >
   Two-arm trial design from RDSS chapter 2. Illustrates MIDA with a simple
   sampling and complete random assignment step.
 params:
-  "N": "Sample size before sampling"
-  "n": "Number sampled"
-  "b": "Background effect"
+  "N": "Number of units (sample or population size)"
+  "n": "Sample size drawn from the population (when N is population size)"
+  "b": "Treatment effect (outcome scale)"
 book_link: https://book.declaredesign.org/introduction/what-is-a-research-design.html#def-ch2num1
 include_in_shiny: true
 ---
+
 
 N <- 1000
 b <- 0
@@ -34,4 +35,3 @@ design <-
   declare_measurement(Y = reveal_outcomes(Y ~ Z)) +
   
   declare_estimator(Y ~ Z, .method = difference_in_means, inquiry = "ATE")
-

@@ -58,9 +58,35 @@ test_that("alias and id both resolve", {
     skip(paste("DeclareDesignZero runtime issue:", conditionMessage(d1)))
   }
   expect_equal(attr(d1, "research_designs_id"), "two_arm_trial")
-  expect_equal(attr(d2, "research_designs_id"), "two_arm_trial")
+  # Book alias 2.1 points at the RDSS chapter port, not the template
+  expect_equal(attr(d2, "research_designs_id"), "two_arm_trial_rdss")
+})
+
+test_that("YAML diagnosands are parsed and preferred_diagnosands works", {
+  skip_if_not(requireNamespace("withr", quietly = TRUE))
+  withr::with_tempdir({
+    dir.create("designs")
+    writeLines(
+      c(
+        "---",
+        "id: dg_demo",
+        "diagnosands: rmse, bias",
+        "---",
+        "b <- 1",
+        "design <- structure(list(), class = 'design')"
+      ),
+      "designs/dg_demo.R"
+    )
+    parsed <- ResearchDesigns:::parse_design_file("designs/dg_demo.R")
+    expect_equal(parsed$meta$diagnosands, c("rmse", "bias"))
+  })
+  expect_equal(preferred_diagnosands("two_arm_trial"), c("bias", "power"))
+  expect_equal(preferred_diagnosands("logit_probit_ols"), c("rmse", "bias"))
+  info <- design_info("logit_probit_ols")
+  expect_equal(info$diagnosands, c("rmse", "bias"))
 })
 
 test_that("contributor_checklist is non-empty", {
   expect_true(length(contributor_checklist()) >= 5)
+  expect_true(any(grepl("diagnosands", contributor_checklist(), fixed = TRUE)))
 })
