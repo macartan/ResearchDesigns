@@ -12,9 +12,12 @@ refresh_library(sims = 100, designs = NULL)
 \item{designs}{Optional subset; default all for audit, shiny-on for previews.}
 }
 \value{
-A list with \code{index}, \code{audit}, and \code{previews}.
+A list with \code{index}, \code{audit}, \code{previews}, \code{ok_ids}, \code{preview_failures},
+and \code{report}.
 }
 \description{
 Runs the contributor-facing checks and refreshes baked artifacts:
 index, audits, and diagnosis previews (\code{sims = 100} by default).
+Audit and preview failures are reported at the end; they do not abort
+the refresh.
 }

@@ -116,23 +116,48 @@ extract_pre_design_objects <- function(code) {
   type_out <- character(0)
   atomic_out <- logical(0)
 
-  for (ln in head_lines) {
+  i <- 1L
+  n <- length(head_lines)
+  while (i <= n) {
+    ln <- head_lines[[i]]
+    i <- i + 1L
     if (grepl("^\\s*#", ln) || !nzchar(trimws(ln))) next
     if (!grepl("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*<-\\s*", ln)) next
     if (grepl("^\\s*(if|for|while)\\b", ln)) next
     nm <- sub("^\\s*([A-Za-z.][A-Za-z0-9._]*)\\s*<-.*$", "\\1", ln)
     rhs <- sub("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*<-\\s*", "", ln)
+
+    # Accumulate continuation lines until the RHS parses (multi-line declare_* etc.)
+    expr <- tryCatch(parse(text = rhs), error = function(e) NULL)
+    while (is.null(expr) && i <= n) {
+      rhs <- paste(rhs, head_lines[[i]], sep = "\n")
+      i <- i + 1L
+      expr <- tryCatch(parse(text = rhs), error = function(e) NULL)
+    }
+    rhs <- trimws(rhs)
+
     if (grepl("\\bfunction\\s*\\(", rhs)) {
       names_out <- c(names_out, nm)
-      rhs_out <- c(rhs_out, trimws(rhs))
+      rhs_out <- c(rhs_out, rhs)
       type_out <- c(type_out, "function")
       atomic_out <- c(atomic_out, FALSE)
       next
     }
+
+    # Prefer structural cues before eval (eval of declare_* needs the DD stack)
+    # Note: do not use \\b after "declare_" — "_" is a word char, so declare_model
+    # would not match.
+    if (grepl("(declare_|make_model\\(|add_level\\(|as_tibble\\(|fabricate\\()", rhs)) {
+      names_out <- c(names_out, nm)
+      rhs_out <- c(rhs_out, rhs)
+      type_out <- c(type_out, "design_piece")
+      atomic_out <- c(atomic_out, FALSE)
+      next
+    }
+
     val <- tryCatch(eval(parse(text = rhs), envir = baseenv()), error = function(e) NULL)
     typ <- if (is.null(val)) {
-      if (grepl("declare_|make_model|add_level|as_tibble|fabricate", rhs)) "design_piece"
-      else "other"
+      "other"
     } else if (is.function(val)) {
       "function"
     } else if (is.atomic(val)) {
@@ -142,7 +167,7 @@ extract_pre_design_objects <- function(code) {
     }
     is_atom <- !is.null(val) && is.atomic(val) && !is.function(val)
     names_out <- c(names_out, nm)
-    rhs_out <- c(rhs_out, trimws(rhs))
+    rhs_out <- c(rhs_out, rhs)
     type_out <- c(type_out, typ)
     atomic_out <- c(atomic_out, is_atom)
   }
@@ -173,11 +198,16 @@ symbol_used_in_code <- function(name, code) {
 #' (or seen by DeclareDesignZero's object finder) but not in the redesignable
 #' parameter list.
 #'
+#' Design steps (MIDA pieces built with `declare_*`, etc.) and helper functions
+#' are not parameters and are omitted unless `include_steps = TRUE`.
+#'
 #' @param design Design id/alias, or a parsed design list from [parse_design_file()].
+#' @param include_steps If `TRUE`, also report design pieces and functions.
+#'   Default `FALSE` (audit-friendly).
 #' @return Data frame of gaps (possibly empty) with columns
 #'   `id`, `name`, `type`, `atomic`, `used_in_code`, `in_finder`, `in_params`.
 #' @export
-param_coverage_gaps <- function(design) {
+param_coverage_gaps <- function(design, include_steps = FALSE) {
   if (is.list(design) && !is.null(design$code) && !is.null(design$meta)) {
     parsed <- design
   } else {
@@ -237,13 +267,22 @@ param_coverage_gaps <- function(design) {
   gaps <- pre[used & !in_params, , drop = FALSE]
   if (!nrow(gaps)) return(empty)
 
+  # Steps / helpers are not redesignable params — don't treat as coverage gaps
+  if (!isTRUE(include_steps)) {
+    step_types <- c("design_piece", "function")
+    gaps <- gaps[is.na(gaps$type) | !gaps$type %in% step_types, , drop = FALSE]
+    if (!nrow(gaps)) return(empty)
+  }
+
+  # Realign logical vectors to remaining gap rows by name
+  gap_names <- gaps$name
   data.frame(
     id = id,
     name = gaps$name,
     type = gaps$type,
     atomic = gaps$atomic,
-    used_in_code = used_in_code[used & !in_params],
-    in_finder = in_finder[used & !in_params],
+    used_in_code = used_in_code[match(gap_names, pre$name)],
+    in_finder = in_finder[match(gap_names, pre$name)],
     in_params = FALSE,
     stringsAsFactors = FALSE
   )
@@ -257,10 +296,11 @@ param_coverage_gaps <- function(design) {
 #'
 #' @param designs Ids/aliases, or `NULL` for all.
 #' @param atomic_only If `TRUE`, only report atomic gaps (likely should be
-#'   redesignable). If `FALSE`, also report helpers, models, etc.
+#'   redesignable). If `FALSE`, also report other non-step gaps (e.g. data frames).
+#' @param include_steps If `TRUE`, also report design pieces and helper functions.
 #' @return A data frame (class `research_designs_param_coverage`) of gaps.
 #' @export
-param_coverage_report <- function(designs = NULL, atomic_only = FALSE) {
+param_coverage_report <- function(designs = NULL, atomic_only = FALSE, include_steps = FALSE) {
   idx <- make_index()
   if (!is.null(designs)) {
     keys <- vapply(designs, normalize_design_key, character(1))
@@ -273,8 +313,20 @@ param_coverage_report <- function(designs = NULL, atomic_only = FALSE) {
 
   parts <- lapply(seq_len(nrow(idx)), function(i) {
     id <- idx$id[[i]]
+    if ("functional" %in% names(idx) && !isTRUE(idx$functional[[i]])) {
+      return(data.frame(
+        id = character(0),
+        name = character(0),
+        type = character(0),
+        atomic = logical(0),
+        used_in_code = logical(0),
+        in_finder = logical(0),
+        in_params = logical(0),
+        stringsAsFactors = FALSE
+      ))
+    }
     tryCatch(
-      param_coverage_gaps(id),
+      param_coverage_gaps(id, include_steps = include_steps),
       error = function(e) {
         data.frame(
           id = id,

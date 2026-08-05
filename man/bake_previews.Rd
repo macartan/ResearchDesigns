@@ -12,8 +12,10 @@ bake_previews(designs = NULL, sims = 100)
 \item{sims}{Number of simulations (package default is 100).}
 }
 \value{
-Invisibly, paths written.
+Invisibly, a list with \code{paths} (character) and \code{failures}
+(data frame with \code{id} and \code{error}).
 }
 \description{
-Bake compact diagnosis previews into inst/previews
+Each design is baked independently. Failures are collected and returned;
+they do not abort the rest of the bake.
 }

@@ -8,6 +8,10 @@ Browse the design library.
   : List designs in the library
 - [`design_info()`](https://macartan.github.io/ResearchDesigns/reference/design_info.md)
   : Design metadata (YAML + defaults)
+- [`preferred_diagnosands()`](https://macartan.github.io/ResearchDesigns/reference/preferred_diagnosands.md)
+  : Preferred diagnosands declared in a design's YAML
+- [`excluded_diagnosands()`](https://macartan.github.io/ResearchDesigns/reference/excluded_diagnosands.md)
+  : Diagnosands excluded from display by YAML
 
 ## Build & inspect
 
@@ -49,15 +53,34 @@ Browse designs interactively and deploy a standalone app folder.
 
 ## Maintain
 
-Index, audit, bake previews, and refresh the library.
+Index, audit, bake previews, refresh the library, and build the site.
 
 - [`refresh_library()`](https://macartan.github.io/ResearchDesigns/reference/refresh_library.md)
   : Refresh the library (maintainer one-stop)
+
 - [`make_index()`](https://macartan.github.io/ResearchDesigns/reference/make_index.md)
   : Build an in-memory index of all designs
+
 - [`audit_designs()`](https://macartan.github.io/ResearchDesigns/reference/audit_designs.md)
   : Audit one or more designs
+
+- [`write_audit_report()`](https://macartan.github.io/ResearchDesigns/reference/write_audit_report.md)
+  :
+
+  Write audit results to CSV, markdown, and plain text under `tools/`
+
 - [`bake_previews()`](https://macartan.github.io/ResearchDesigns/reference/bake_previews.md)
   : Bake compact diagnosis previews into inst/previews
+
+- [`build_docs()`](https://macartan.github.io/ResearchDesigns/reference/build_docs.md)
+  : Build the pkgdown site (Dropbox-safe)
+
 - [`contributor_checklist()`](https://macartan.github.io/ResearchDesigns/reference/contributor_checklist.md)
   : Contributor checklist for a design
+
+- [`param_coverage_report()`](https://macartan.github.io/ResearchDesigns/reference/param_coverage_report.md)
+  : Report declared-before-design objects missing from design parameters
+
+- [`param_coverage_gaps()`](https://macartan.github.io/ResearchDesigns/reference/param_coverage_gaps.md)
+  : Objects declared before design, used by it, but missing from design
+  params

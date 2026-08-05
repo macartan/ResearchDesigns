@@ -9,7 +9,8 @@ A prototype for a library of declared designs using DeclareDesignZero.
 - Each design is a self-contained `.R` file under `inst/designs/`.
 - The **design object** is the source of truth for editable parameters.
 - Optional YAML frontmatter adds labels, categories, keywords, book
-  aliases, `packages:` extras, and `params:` tip strings.
+  aliases, `packages:` extras, `diagnosands:` defaults for display, and
+  `params:` tip strings.
 - YAML is optional. With no header: id = filename stem, label =
   humanized id, `category: Other`, object name `design`,
   `include_in_shiny: true`. Set `object:` only if the R object is not
@@ -35,7 +36,14 @@ Maintainer one-stop:
 ``` r
 
 refresh_library()   # index + audit + bake previews (sims = 100)
+build_docs()        # pkgdown site -> docs/ (safe on Dropbox / Windows)
 ```
+
+If
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+fails with `write_html` / “Error closing file”, use
+[`build_docs()`](https://macartan.github.io/ResearchDesigns/reference/build_docs.md)
+instead: it builds in a local temp folder, then copies into `docs/`.
 
 ## Server deploy
 
@@ -66,6 +74,14 @@ Save as `inst/designs/my_design.R`. Parameters are discovered from the
 design; `redesign()` /
 [`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md)
 use those names.
+
+Optional YAML can set preferred diagnosands for the Shiny Diagnosis and
+Redesign tabs (falls back to bias and power):
+
+``` yaml
+diagnosands: [rmse, bias]
+# or: diagnosands: rmse, bias
+```
 
 ## Classic DeclareDesign vs DeclareDesignZero
 

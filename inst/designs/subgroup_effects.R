@@ -9,11 +9,13 @@ description: >
 params:
   "n_x1": "Sample size in subgroup X1 (or size allocated to X1)"
   "total_n": "Total sample size"
-book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num6
+  "fixed_pop": "A fixed population df"
+  book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num6
 include_in_shiny: true
 ---
 
 set.seed(343)
+
 fixed_pop <-
   fabricate(N = 10000,
             X = rbinom(N, 1, 0.2),

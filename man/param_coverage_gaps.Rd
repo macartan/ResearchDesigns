@@ -4,10 +4,13 @@
 \alias{param_coverage_gaps}
 \title{Objects declared before design, used by it, but missing from design params}
 \usage{
-param_coverage_gaps(design)
+param_coverage_gaps(design, include_steps = FALSE)
 }
 \arguments{
 \item{design}{Design id/alias, or a parsed design list from \code{\link[=parse_design_file]{parse_design_file()}}.}
+
+\item{include_steps}{If \code{TRUE}, also report design pieces and functions.
+Default \code{FALSE} (audit-friendly).}
 }
 \value{
 Data frame of gaps (possibly empty) with columns
@@ -18,4 +21,7 @@ Runs the design, reads \code{\link[=discover_design_params]{discover_design_para
 assignments before \verb{design <-}. Flags names that are used in the design body
 (or seen by DeclareDesignZero's object finder) but not in the redesignable
 parameter list.
+
+Design steps (MIDA pieces built with \code{declare_*}, etc.) and helper functions
+are not parameters and are omitted unless \code{include_steps = TRUE}.
 }

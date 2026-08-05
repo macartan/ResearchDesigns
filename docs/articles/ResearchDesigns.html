@@ -35,6 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ResearchDesigns.html">ResearchDesigns overview</a></li>
+    <li><a class="dropdown-item" href="../articles/contributing.html">Contributing a design</a></li>
   </ul>
 </li>
       </ul>
@@ -70,6 +71,9 @@ have to place a self-contained <code>.R</code> file in
 <code>inst/designs/</code>. That file declares a design and, optionally,
 a short YAML header. Once it is there, the design can be loaded,
 modified, diagnosed, and browsed in the bundled Shiny app.</p>
+<p>For the contribution workflow (fork, add file, refresh, check, pull
+request), see the vignette <em>Contributing a design</em> or the Shiny
+<strong>Contribute</strong> tab.</p>
 </div>
 <div class="section level2">
 <h2 id="what-a-design-file-looks-like">What a design file looks like<a class="anchor" aria-label="anchor" href="#what-a-design-file-looks-like"></a>
@@ -84,28 +88,30 @@ modified, diagnosed, and browsed in the bundled Shiny app.</p>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>description<span class="sc">:</span> <span class="er">&gt;</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  Simple two<span class="sc">-</span>arm trial with complete random assignment.</span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>params<span class="sc">:</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="st">"N"</span><span class="sc">:</span> <span class="st">"Sample size"</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="st">"b"</span><span class="sc">:</span> <span class="st">"Treatment effect"</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>include_in_shiny<span class="sc">:</span> true</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="sc">---</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>design <span class="ot">&lt;-</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  </span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="fu">declare_model</span>(</span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>    <span class="at">N =</span> N,</span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>    <span class="fu">potential_outcomes</span>(Y <span class="sc">~</span> b <span class="sc">*</span> Z <span class="sc">+</span> <span class="fu">rnorm</span>(N))</span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>  <span class="fu">declare_inquiry</span>(<span class="at">ATE =</span> <span class="fu">mean</span>(Y_Z_1) <span class="sc">-</span> <span class="fu">mean</span>(Y_Z_0)) <span class="sc">+</span></span>
-<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>  </span>
-<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>  <span class="fu">declare_assignment</span>(<span class="at">Z =</span> <span class="fu">complete_ra</span>(N)) <span class="sc">+</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="st">"N"</span><span class="sc">:</span> <span class="st">"Number of units (sample or population size)"</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="st">"b"</span><span class="sc">:</span> <span class="st">"Treatment effect (outcome scale)"</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>diagnosands<span class="sc">:</span> [bias, power]</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>include_in_shiny<span class="sc">:</span> true</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="sc">---</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>design <span class="ot">&lt;-</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  </span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="fu">declare_model</span>(</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>    <span class="at">N =</span> N,</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>    <span class="fu">potential_outcomes</span>(Y <span class="sc">~</span> b <span class="sc">*</span> Z <span class="sc">+</span> <span class="fu">rnorm</span>(N))</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>  <span class="fu">declare_inquiry</span>(<span class="at">ATE =</span> <span class="fu">mean</span>(Y_Z_1) <span class="sc">-</span> <span class="fu">mean</span>(Y_Z_0)) <span class="sc">+</span></span>
 <span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>  </span>
-<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>  <span class="fu">declare_measurement</span>(<span class="at">Y =</span> <span class="fu">reveal_outcomes</span>(Y <span class="sc">~</span> Z)) <span class="sc">+</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>  <span class="fu">declare_assignment</span>(<span class="at">Z =</span> <span class="fu">complete_ra</span>(N)) <span class="sc">+</span></span>
 <span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>  </span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  <span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">.method =</span> difference_in_means, <span class="at">inquiry =</span> <span class="st">"ATE"</span>)</span></code></pre></div>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  <span class="fu">declare_measurement</span>(<span class="at">Y =</span> <span class="fu">reveal_outcomes</span>(Y <span class="sc">~</span> Z)) <span class="sc">+</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  </span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>  <span class="fu">declare_estimator</span>(Y <span class="sc">~</span> Z, <span class="at">.method =</span> difference_in_means, <span class="at">inquiry =</span> <span class="st">"ATE"</span>)</span></code></pre></div>
 </details><p>The header is optional. At minimum you need a design object (by
 default named <code>design</code>). Parameter tips are plain strings
 under <code>params:</code>; quote keys such as <code>"N"</code> and
@@ -120,18 +126,18 @@ available to <code><a href="../reference/make_design.html">make_design()</a></co
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/list_designs.html">list_designs</a></span><span class="op">(</span>discover_params <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ResearchDesigns library: 6 designs</span></span>
+<span><span class="co">#&gt; ResearchDesigns library: 58 designs</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  id                  alias label                    </span></span>
-<span><span class="co">#&gt;  pate_with_sampling  4.1   PATE with sampling       </span></span>
-<span><span class="co">#&gt;  two_arm_trial             Simple two-arm trial     </span></span>
-<span><span class="co">#&gt;  two_arm_with_blocks       Two-arm trial with blocks</span></span>
-<span><span class="co">#&gt;  logit_probit_ols    11.5  Logit, probit, or OLS?   </span></span>
-<span><span class="co">#&gt;  two_arm_trial_rdss  2.1   Two-arm trial from RDSS  </span></span>
+<span><span class="co">#&gt;  id                  alias label                                               </span></span>
+<span><span class="co">#&gt;  two_arm_trial             Simple two-arm trial                                </span></span>
+<span><span class="co">#&gt;  two_arm_with_blocks       Two-arm trial with blocks                           </span></span>
+<span><span class="co">#&gt;  baseline_over_N     11.1  A baseline declaration intended to be reed over $N$.</span></span>
+<span><span class="co">#&gt;  audit_experiment    17.1  audit experiment                                    </span></span>
+<span><span class="co">#&gt;  audit_intervention  17.2  audit intervention                                  </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ... and 1 more.</span></span>
+<span><span class="co">#&gt; ... and 53 more.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Packages: logit_probit_ols (margins, broom)</span></span>
+<span><span class="co">#&gt; Packages: conditional_expectation (purrr, tibble); conjoint (rdss, cjoint); diff_in_diff (rdss, DIDmultiplegt); italian_village_bayes (rdss, rstanarm); logit_probit_ols (margins, broom); matching (MatchIt); multi_site_studies (metafor); multilevel (rdss, lme4, dplyr, tibble); network_experiment (rdss, spdep, interference, tidyverse); process_tracing (rdss, CausalQueries); multilevel_answer_strategies (rdss, lme4, dplyr, tibble); regression_discontinuity (rdss, rdrobust); regression_discontinuity_fuzzy (rdss, rdrobust); structural_estimation (bbmle)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; See design_info("id") or get_args("id") for details;</span></span>
 <span><span class="co">#&gt; as.data.frame(list_designs()) for the full table.</span></span></code></pre></div>
@@ -214,7 +220,9 @@ step</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>ResearchDesigns.root <span class="op">=</span> <span class="st">"C:/path/to/ResearchDesigns"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/refresh_library.html">refresh_library</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>That is the whole loop: drop in a design file, use it from R or
-Shiny, and refresh the library when you change the set.</p>
+Shiny, and refresh the library when you change the set. Step-by-step
+contribution guidance is in
+<code><a href="../articles/contributing.html">vignette("contributing", package = "ResearchDesigns")</a></code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -37,6 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/ResearchDesigns.html">ResearchDesigns overview</a></li>
+    <li><a class="dropdown-item" href="articles/contributing.html">Contributing a design</a></li>
   </ul>
 </li>
       </ul>
@@ -60,7 +61,7 @@
 <ul>
 <li>Each design is a self-contained <code>.R</code> file under <code>inst/designs/</code>.</li>
 <li>The <strong>design object</strong> is the source of truth for editable parameters.</li>
-<li>Optional YAML frontmatter adds labels, categories, keywords, book aliases, <code>packages:</code> extras, and <code>params:</code> tip strings.</li>
+<li>Optional YAML frontmatter adds labels, categories, keywords, book aliases, <code>packages:</code> extras, <code>diagnosands:</code> defaults for display, and <code>params:</code> tip strings.</li>
 <li>YAML is optional. With no header: id = filename stem, label = humanized id, <code>category: Other</code>, object name <code>design</code>, <code>include_in_shiny: true</code>. Set <code>object:</code> only if the R object is not named <code>design</code>.</li>
 </ul>
 </div>
@@ -79,7 +80,9 @@
 <span><span class="fu"><a href="reference/copy_library_shiny.html">copy_library_shiny</a></span><span class="op">(</span><span class="st">"path/to/app"</span><span class="op">)</span>     <span class="co"># standalone Shiny folder for the server</span></span></code></pre></div>
 <p>Maintainer one-stop:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/refresh_library.html">refresh_library</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># index + audit + bake previews (sims = 100)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/refresh_library.html">refresh_library</a></span><span class="op">(</span><span class="op">)</span>   <span class="co"># index + audit + bake previews (sims = 100)</span></span>
+<span><span class="fu"><a href="reference/build_docs.html">build_docs</a></span><span class="op">(</span><span class="op">)</span>        <span class="co"># pkgdown site -&gt; docs/ (safe on Dropbox / Windows)</span></span></code></pre></div>
+<p>If <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> fails with <code>write_html</code> / “Error closing file”, use <code><a href="reference/build_docs.html">build_docs()</a></code> instead: it builds in a local temp folder, then copies into <code>docs/</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="server-deploy">Server deploy<a class="anchor" aria-label="anchor" href="#server-deploy"></a>
@@ -99,13 +102,16 @@
 <span>  <span class="fu">declare_measurement</span><span class="op">(</span>Y <span class="op">=</span> <span class="va">Y_Z_1</span> <span class="op">*</span> <span class="va">Z</span> <span class="op">+</span> <span class="va">Y_Z_0</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">Z</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">declare_estimator</span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">Z</span>, inquiry <span class="op">=</span> <span class="st">"ATE"</span><span class="op">)</span></span></code></pre></div>
 <p>Save as <code>inst/designs/my_design.R</code>. Parameters are discovered from the design; <code>redesign()</code> / <code><a href="reference/make_design.html">make_design()</a></code> use those names.</p>
+<p>Optional YAML can set preferred diagnosands for the Shiny Diagnosis and Redesign tabs (falls back to bias and power):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">diagnosands</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">rmse</span><span class="kw">,</span><span class="at"> bias</span><span class="kw">]</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># or: diagnosands: rmse, bias</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="classic-declaredesign-vs-declaredesignzero">Classic DeclareDesign vs DeclareDesignZero<a class="anchor" aria-label="anchor" href="#classic-declaredesign-vs-declaredesignzero"></a>
 </h2>
 <p><strong>Classic DeclareDesign</strong> (and DesignLibrary) often paired a <em>designer function</em> with a design: parameters lived on the designer, and tools like <code>expand_design(two_arm_designer, N = c(50, 100))</code> swept that function. Reproducible code was glued on with special extraction (<code>{{{ }}}</code>).</p>
 <p><strong>DeclareDesignZero</strong> keeps the same declaration verbs (<code>declare_model</code>, <code>+</code>, <code>diagnose_design</code>, …) but treats the <strong>declared design itself</strong> as redesignable. Free symbols in the design (e.g. <code>b</code>, <code>tau</code>) are found on the object, so:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">designs</span> <span class="op">&lt;-</span> <span class="fu">redesign</span><span class="op">(</span><span class="va">design</span>, tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">diagnose_design</span><span class="op">(</span><span class="va">designs</span>, sims <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p>needs no designer and no DesignLibrary-style gluing. This package is built for that model.</p>

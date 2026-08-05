@@ -4,13 +4,15 @@
 \alias{param_coverage_report}
 \title{Report declared-before-design objects missing from design parameters}
 \usage{
-param_coverage_report(designs = NULL, atomic_only = FALSE)
+param_coverage_report(designs = NULL, atomic_only = FALSE, include_steps = FALSE)
 }
 \arguments{
 \item{designs}{Ids/aliases, or \code{NULL} for all.}
 
 \item{atomic_only}{If \code{TRUE}, only report atomic gaps (likely should be
-redesignable). If \code{FALSE}, also report helpers, models, etc.}
+redesignable). If \code{FALSE}, also report other non-step gaps (e.g. data frames).}
+
+\item{include_steps}{If \code{TRUE}, also report design pieces and helper functions.}
 }
 \value{
 A data frame (class \code{research_designs_param_coverage}) of gaps.
@@ -18,5 +20,6 @@ A data frame (class \code{research_designs_param_coverage}) of gaps.
 \description{
 For each library design: evaluate the file, read redesignable parameters from
 the design object, and list top-level objects that are used by the design but
-do not appear in that parameter list.
+do not appear in that parameter list. Design steps and helper functions are
+omitted by default.
 }

@@ -483,9 +483,13 @@ print.research_designs_audit <- function(x, ...) {
 
 #' Bake compact diagnosis previews into inst/previews
 #'
+#' Each design is baked independently. Failures are collected and returned;
+#' they do not abort the rest of the bake.
+#'
 #' @param designs Ids/aliases, or `NULL` for shiny-included designs.
 #' @param sims Number of simulations (package default is 100).
-#' @return Invisibly, paths written.
+#' @return Invisibly, a list with `paths` (character) and `failures`
+#'   (data frame with `id` and `error`).
 #' @export
 bake_previews <- function(designs = NULL, sims = 100) {
   paths_info <- package_write_paths()
@@ -500,41 +504,65 @@ bake_previews <- function(designs = NULL, sims = 100) {
     keep <- idx$id %in% keys | idx$alias %in% keys
     idx <- idx[keep, , drop = FALSE]
   }
+  empty_fail <- data.frame(id = character(0), error = character(0), stringsAsFactors = FALSE)
   if (!nrow(idx)) {
     warning("No designs selected for previews.", call. = FALSE)
-    return(invisible(character(0)))
+    return(invisible(list(paths = character(0), failures = empty_fail)))
   }
 
   paths <- character(0)
+  fail_ids <- character(0)
+  fail_errs <- character(0)
+
   for (i in seq_len(nrow(idx))) {
     id <- idx$id[[i]]
-    design <- make_design(id)
-    diagnosis <- DeclareDesignZero::diagnose_design(design, sims = as.integer(sims))
-    summary <- tryCatch(
-      DeclareDesignZero::get_diagnosands(diagnosis),
-      error = function(e) NULL
-    )
-    tidy <- tryCatch({
-      if (requireNamespace("generics", quietly = TRUE)) {
-        generics::tidy(diagnosis)
-      } else {
-        summary
-      }
-    }, error = function(e) summary)
-    path <- file.path(out_dir, paste0(id, ".rds"))
-    saveRDS(
-      list(
-        id = id,
-        sims = as.integer(sims),
-        summary = summary,
-        tidy = tidy,
-        diagnosis = diagnosis
-      ),
-      path
-    )
-    paths <- c(paths, path)
+    message("Baking preview: ", id, " (", i, "/", nrow(idx), ")")
+    err <- tryCatch({
+      design <- make_design(id)
+      diagnosis <- DeclareDesignZero::diagnose_design(design, sims = as.integer(sims))
+      summary <- tryCatch(
+        DeclareDesignZero::get_diagnosands(diagnosis),
+        error = function(e) NULL
+      )
+      tidy <- tryCatch({
+        if (requireNamespace("generics", quietly = TRUE)) {
+          generics::tidy(diagnosis)
+        } else {
+          summary
+        }
+      }, error = function(e) summary)
+      path <- file.path(out_dir, paste0(id, ".rds"))
+      saveRDS(
+        list(
+          id = id,
+          sims = as.integer(sims),
+          summary = summary,
+          tidy = tidy,
+          diagnosis = diagnosis
+        ),
+        path
+      )
+      paths <<- c(paths, path)
+      NULL
+    }, error = function(e) conditionMessage(e))
+
+    if (!is.null(err)) {
+      fail_ids <- c(fail_ids, id)
+      fail_errs <- c(fail_errs, err)
+      message("  FAILED: ", err)
+    }
   }
-  invisible(paths)
+
+  failures <- data.frame(id = fail_ids, error = fail_errs, stringsAsFactors = FALSE)
+  if (nrow(failures)) {
+    warning(
+      "bake_previews(): ", nrow(failures), "/", nrow(idx),
+      " failed: ", paste(failures$id, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  invisible(list(paths = paths, failures = failures))
 }
 
 #' Write index artifact under inst/library_index
@@ -553,10 +581,13 @@ write_index_artifact <- function(index = make_index()) {
 #'
 #' Runs the contributor-facing checks and refreshes baked artifacts:
 #' index, audits, and diagnosis previews (`sims = 100` by default).
+#' Audit and preview failures are reported at the end; they do not abort
+#' the refresh.
 #'
 #' @param sims Preview simulations (default 100).
 #' @param designs Optional subset; default all for audit, shiny-on for previews.
-#' @return A list with `index`, `audit`, and `previews`.
+#' @return A list with `index`, `audit`, `previews`, `ok_ids`, `preview_failures`,
+#'   and `report`.
 #' @export
 refresh_library <- function(sims = 100, designs = NULL) {
   paths_info <- package_write_paths()
@@ -576,35 +607,23 @@ refresh_library <- function(sims = 100, designs = NULL) {
   audit <- audit_designs(designs = designs, sims = NULL, write_report = TRUE)
   print(audit)
 
-  # Only bake designs that fully passed (not parked skips)
   ok_ids <- vapply(audit$results, function(r) {
     if (isTRUE(r$ok) && !isTRUE(r$skipped)) r$id else NA_character_
   }, character(1))
   ok_ids <- ok_ids[!is.na(ok_ids)]
-  if (!is.null(audit$n_fail) && audit$n_fail > 0) {
-    failed <- vapply(
-      Filter(function(r) !isTRUE(r$ok), audit$results),
-      function(r) r$id,
-      character(1)
-    )
-    warning(
-      "audit_designs(): ", audit$n_fail, "/", audit$n,
-      " failed. Baking previews only for OK designs.\nFailed: ",
-      paste(failed, collapse = ", "),
-      if (length(audit$report_paths)) {
-        paste0("\nSee report: ", paste(audit$report_paths, collapse = ", "))
-      } else {
-        ""
-      },
-      call. = FALSE
-    )
-  }
-  if (!length(ok_ids)) {
-    stop("refresh_library() stopped: no designs passed audit.", call. = FALSE)
-  }
 
-  bake_ids <- if (is.null(designs)) {
-    # default bake: shiny-included âˆ© audit OK
+  audit_failed <- vapply(
+    Filter(function(r) !isTRUE(r$ok), audit$results),
+    function(r) r$id,
+    character(1)
+  )
+
+  empty_fail <- data.frame(id = character(0), error = character(0), stringsAsFactors = FALSE)
+
+  bake_ids <- if (!length(ok_ids)) {
+    character(0)
+  } else if (is.null(designs)) {
+    # default bake: shiny-included intersect audit OK
     idx_ok <- index[index$id %in% ok_ids & index$include_in_shiny, , drop = FALSE]
     idx_ok$id
   } else {
@@ -613,10 +632,69 @@ refresh_library <- function(sims = 100, designs = NULL) {
       index$id[index$id %in% keys | index$alias %in% keys]
     })
   }
-  previews <- bake_previews(designs = bake_ids, sims = sims)
-  message("Previews written: ", length(previews), " (of ", length(bake_ids), " OK targets)")
 
-  invisible(list(index = index, audit = audit, previews = previews, ok_ids = ok_ids))
+  bake <- if (length(bake_ids)) {
+    bake_previews(designs = bake_ids, sims = sims)
+  } else {
+    list(paths = character(0), failures = empty_fail)
+  }
+  preview_paths <- bake$paths %||% character(0)
+  preview_failures <- bake$failures %||% empty_fail
+
+  lines <- c(
+    "ResearchDesigns refresh_library() summary",
+    paste0("Package root: ", paths_info$root),
+    paste0("Index designs: ", nrow(index)),
+    paste0(
+      "Audit: ", audit$n_ok, " ok, ",
+      audit$n_skipped %||% 0, " parked, ",
+      audit$n_fail %||% 0, " failed"
+    ),
+    paste0("Previews written: ", length(preview_paths), " of ", length(bake_ids), " targets"),
+    ""
+  )
+  if (length(audit_failed)) {
+    lines <- c(lines, "Audit failures:", paste0("  - ", audit_failed), "")
+  }
+  if (nrow(preview_failures)) {
+    lines <- c(
+      lines,
+      "Preview bake failures:",
+      paste0("  - ", preview_failures$id, ": ", preview_failures$error),
+      ""
+    )
+  }
+  if (!length(audit_failed) && !nrow(preview_failures)) {
+    lines <- c(lines, "No failures.", "")
+  }
+  if (length(audit$report_paths)) {
+    lines <- c(lines, "Audit report:", paste0("  ", audit$report_paths), "")
+  }
+
+  report_dir <- file.path(paths_info$root, "tools")
+  dir.create(report_dir, recursive = TRUE, showWarnings = FALSE)
+  report_path <- file.path(report_dir, "refresh_report.txt")
+  writeLines(lines, report_path)
+
+  message("\n===== refresh_library summary =====")
+  for (ln in lines) message(ln)
+  message("Wrote ", report_path)
+
+  if (length(audit_failed) || nrow(preview_failures)) {
+    warning(
+      "refresh_library() finished with issues. See ", report_path,
+      call. = FALSE
+    )
+  }
+
+  invisible(list(
+    index = index,
+    audit = audit,
+    previews = preview_paths,
+    ok_ids = ok_ids,
+    preview_failures = preview_failures,
+    report = report_path
+  ))
 }
 
 #' Copy directory contents (Dropbox-friendly retries)

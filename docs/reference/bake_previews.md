@@ -1,6 +1,7 @@
 # Bake compact diagnosis previews into inst/previews
 
-Bake compact diagnosis previews into inst/previews
+Each design is baked independently. Failures are collected and returned;
+they do not abort the rest of the bake.
 
 ## Usage
 
@@ -20,4 +21,5 @@ bake_previews(designs = NULL, sims = 100)
 
 ## Value
 
-Invisibly, paths written.
+Invisibly, a list with `paths` (character) and `failures` (data frame
+with `id` and `error`).

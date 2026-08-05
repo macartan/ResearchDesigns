@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://macartan.github.io/ResearchDesigns/404.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/articles/contributing.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/articles/index.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/articles/ResearchDesigns.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/authors.html</loc></url>
@@ -8,10 +9,12 @@
 <url><loc>https://macartan.github.io/ResearchDesigns/LICENSE.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/audit_designs.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/bake_previews.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/build_docs.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/contributor_checklist.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/copy_library_shiny.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/design_info.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/design_profile.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/excluded_diagnosands.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/get_args.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/get_code.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/get_preview.html</loc></url>
@@ -21,8 +24,12 @@
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/list_designs.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/make_design.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/make_index.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/param_coverage_gaps.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/param_coverage_report.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/preferred_diagnosands.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/refresh_library.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/ResearchDesigns-package.html</loc></url>
 <url><loc>https://macartan.github.io/ResearchDesigns/reference/run_shiny.html</loc></url>
+<url><loc>https://macartan.github.io/ResearchDesigns/reference/write_audit_report.html</loc></url>
 </urlset>
 

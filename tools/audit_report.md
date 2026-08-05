@@ -1,6 +1,6 @@
 # ResearchDesigns audit report
 
-Summary: **54/58** designs OK, **1** parked (`functional: false`), **3** failed.
+Summary: **52/58** designs OK, **1** parked (`functional: false`), **5** failed.
 
 Issue types: `missing_packages`, `yaml_extra_params`, `param_discovery`, `load_error`, `missing_object`, `diagnose_failed`, `disabled`, `other`.
 
@@ -26,33 +26,28 @@ Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.
 - **multilevel_answer_strategies** (`15.5`)
   - attempt to use zero-length variable name
 
+### yaml_extra_params
+
+- **simple_random_sampling** (`15.1`)
+  - YAML params not in design: portola
+  - extra YAML: portola
+
+- **subgroup_effects** (`18.6`)
+  - YAML params not in design: fixed_pop, book_link
+  - extra YAML: fixed_pop, book_link
+
 ## Soft notes (OK designs)
 
-- **blocked_and_clustered**: undocumented: N, individual_shock
 - **cluster_random_sampling**: undocumented: locality_shock, individual_shock, se_type; gaps: budget_function
 - **conditional_expectation**: undocumented: N; atomic gaps: polynomial_degrees
-- **conjoint**: undocumented: N, respondent.id; gaps: conjoint_utility
-- **diff_in_diff**: undocumented: N, Y, G, T, D, mode
+- **conjoint**: undocumented: respondent.id; gaps: conjoint_utility
+- **diff_in_diff**: undocumented: Y, G, T, D, mode
 - **italian_village_continued**: gaps: declaration_9.1
-- **logit_probit_ols**: gaps: tidy_margins
 - **matching**: gaps: exact_matching
-- **multi_site_studies**: undocumented: N
-- **process_tracing**: gaps: causal_model
-- **random_forests**: gaps: f_Y, get_best_predictor
-- **randomized_saturation**: undocumented: N, individual_shock
-- **regression_discontinuity**: undocumented: N, c; gaps: control, treatment
-- **regression_discontinuity_fuzzy**: undocumented: N; gaps: control, treatment
-- **simple_random_sampling**: undocumented: N; gaps: portola
-- **stepped_wedge**: undocumented: N
-- **structural_estimation**: gaps: offer, likelihood
-- **subgroup_effects**: gaps: fixed_pop
-- **survey_nonresponse**: undocumented: N
-- **trust_game**: undocumented: id_cols, names_from; gaps: invested, average_invested, returned, average_returned
-- **two_arm_randomized_experiment**: gaps: model, inquiry, sampling, assignment, measurement, answer_strategy
-- **two_arm_with_blocks**: undocumented: N
-- **two_outcome_model_a**: gaps: M1, IDA
-- **two_outcome_model_b**: gaps: M2, IDA
-- **village_campaign**: undocumented: N; gaps: model_12.1, inquiry_12.1, data_strategy_12.1, answer_strategy_12.1
+- **random_forests**: gaps: get_best_predictor
+- **regression_discontinuity**: undocumented: N, c
+- **regression_discontinuity_fuzzy**: undocumented: N
+- **trust_game**: undocumented: id_cols, names_from
 
 ## Full table
 

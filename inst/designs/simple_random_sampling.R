@@ -9,11 +9,13 @@ description: >
 params:
   "cuts": "Cut points for stratified or grouped sampling"
   "sample_size": "Sample size"
+  "portola": "A dataframe describing a town"
 book_link: https://book.declaredesign.org/library/observational-descriptive.html#def-ch15num1
 include_in_shiny: true
 ---
 
 set.seed(343) # fix random seed to yield a fixed population of units
+
 portola <-
   fabricate(
     N = 2100,

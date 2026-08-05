@@ -1,4 +1,4 @@
-ResearchDesigns audit: 54/58 ok, 1 parked, 3 failed
+ResearchDesigns audit: 52/58 ok, 1 parked, 5 failed
 (Order: FAIL, SKIP/parked, OK-with-notes, OK)
 
  - latent_variables: FAIL [param_discovery] - attempt to use zero-length variable name
@@ -7,9 +7,13 @@ ResearchDesigns audit: 54/58 ok, 1 parked, 3 failed
      declared+used but not in design params: states
  - multilevel_answer_strategies: FAIL [param_discovery] - attempt to use zero-length variable name
      declared+used but not in design params: states
+ - simple_random_sampling: FAIL [yaml_extra_params] - YAML params not in design: portola
+     extra YAML params: portola
+     declared+used but not in design params: portola
+ - subgroup_effects: FAIL [yaml_extra_params] - YAML params not in design: fixed_pop, book_link
+     extra YAML params: fixed_pop, book_link
+     declared+used but not in design params: fixed_pop
  - network_experiment: SKIP [disabled] - functional: false (parked; skipped by audit)
- - blocked_and_clustered: OK
-     undocumented params (ok): N, individual_shock
  - cluster_random_sampling: OK
      undocumented params (ok): locality_shock, individual_shock, se_type
      declared+used but not in design params: budget_function
@@ -17,60 +21,28 @@ ResearchDesigns audit: 54/58 ok, 1 parked, 3 failed
      undocumented params (ok): N
      declared+used but not in design params (atomic): polynomial_degrees
  - conjoint: OK
-     undocumented params (ok): N, respondent.id
+     undocumented params (ok): respondent.id
      declared+used but not in design params: conjoint_utility
  - diff_in_diff: OK
-     undocumented params (ok): N, Y, G, T, D, mode
+     undocumented params (ok): Y, G, T, D, mode
  - italian_village_continued: OK
      declared+used but not in design params: declaration_9.1
- - logit_probit_ols: OK
-     declared+used but not in design params: tidy_margins
  - matching: OK
      declared+used but not in design params: exact_matching
- - multi_site_studies: OK
-     undocumented params (ok): N
- - process_tracing: OK
-     declared+used but not in design params: causal_model
  - random_forests: OK
-     declared+used but not in design params: f_Y, get_best_predictor
- - randomized_saturation: OK
-     undocumented params (ok): N, individual_shock
+     declared+used but not in design params: get_best_predictor
  - regression_discontinuity: OK
      undocumented params (ok): N, c
-     declared+used but not in design params: control, treatment
  - regression_discontinuity_fuzzy: OK
-     undocumented params (ok): N
-     declared+used but not in design params: control, treatment
- - simple_random_sampling: OK
-     undocumented params (ok): N
-     declared+used but not in design params: portola
- - stepped_wedge: OK
-     undocumented params (ok): N
- - structural_estimation: OK
-     declared+used but not in design params: offer, likelihood
- - subgroup_effects: OK
-     declared+used but not in design params: fixed_pop
- - survey_nonresponse: OK
      undocumented params (ok): N
  - trust_game: OK
      undocumented params (ok): id_cols, names_from
-     declared+used but not in design params: invested, average_invested, returned, average_returned
- - two_arm_randomized_experiment: OK
-     declared+used but not in design params: model, inquiry, sampling, assignment, measurement, answer_strategy
- - two_arm_with_blocks: OK
-     undocumented params (ok): N
- - two_outcome_model_a: OK
-     declared+used but not in design params: M1, IDA
- - two_outcome_model_b: OK
-     declared+used but not in design params: M2, IDA
- - village_campaign: OK
-     undocumented params (ok): N
-     declared+used but not in design params: model_12.1, inquiry_12.1, data_strategy_12.1, answer_strategy_12.1
  - audit_experiment: OK
  - audit_intervention: OK
  - bare_bones_two_arm: OK
  - baseline_over_N: OK
  - block_randomized_trial: OK
+ - blocked_and_clustered: OK
  - bootstrapped: OK
  - covariate_adjustment: OK
  - declaration_using_declare: OK
@@ -86,12 +58,24 @@ ResearchDesigns audit: 54/58 ok, 1 parked, 3 failed
  - linear_regression: OK
  - list_experiment: OK
  - list_or_direct_questions: OK
+ - logit_probit_ols: OK
+ - multi_site_studies: OK
  - pate_with_sampling: OK
  - population_estimands: OK
+ - process_tracing: OK
  - randomization_inference: OK
+ - randomized_saturation: OK
  - single_period_two_arm: OK
+ - stepped_wedge: OK
+ - structural_estimation: OK
+ - survey_nonresponse: OK
+ - two_arm_randomized_experiment: OK
  - two_arm_trial: OK
  - two_arm_trial_library: OK
  - two_arm_trial_rdss: OK
+ - two_arm_with_blocks: OK
  - two_arm_with_blocks_rdss: OK
+ - two_outcome_model_a: OK
+ - two_outcome_model_b: OK
  - uncertainty_over_effect_size: OK
+ - village_campaign: OK

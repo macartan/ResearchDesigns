@@ -50,6 +50,7 @@ reference:
   - refresh_library
   - make_index
   - audit_designs
+  - write_audit_report
   - bake_previews
   - build_docs
   - contributor_checklist

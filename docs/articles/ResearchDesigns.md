@@ -7,6 +7,10 @@ self-contained `.R` file in `inst/designs/`. That file declares a design
 and, optionally, a short YAML header. Once it is there, the design can
 be loaded, modified, diagnosed, and browsed in the bundled Shiny app.
 
+For the contribution workflow (fork, add file, refresh, check, pull
+request), see the vignette *Contributing a design* or the Shiny
+**Contribute** tab.
+
 ## What a design file looks like
 
 Here is the starter design `two_arm_trial`.
@@ -22,10 +26,12 @@ keywords: [experiment, two-arm]
 description: >
   Simple two-arm trial with complete random assignment.
 params:
-  "N": "Sample size"
-  "b": "Treatment effect"
+  "N": "Number of units (sample or population size)"
+  "b": "Treatment effect (outcome scale)"
+diagnosands: [bias, power]
 include_in_shiny: true
 ---
+
 
 N <- 1000
 b <- 0.2
@@ -62,18 +68,18 @@ the maintainer audits, and
 ``` r
 
 list_designs(discover_params = FALSE)
-#> ResearchDesigns library: 6 designs
+#> ResearchDesigns library: 58 designs
 #> 
-#>  id                  alias label                    
-#>  pate_with_sampling  4.1   PATE with sampling       
-#>  two_arm_trial             Simple two-arm trial     
-#>  two_arm_with_blocks       Two-arm trial with blocks
-#>  logit_probit_ols    11.5  Logit, probit, or OLS?   
-#>  two_arm_trial_rdss  2.1   Two-arm trial from RDSS  
+#>  id                  alias label                                               
+#>  two_arm_trial             Simple two-arm trial                                
+#>  two_arm_with_blocks       Two-arm trial with blocks                           
+#>  baseline_over_N     11.1  A baseline declaration intended to be reed over $N$.
+#>  audit_experiment    17.1  audit experiment                                    
+#>  audit_intervention  17.2  audit intervention                                  
 #> 
-#> ... and 1 more.
+#> ... and 53 more.
 #> 
-#> Packages: logit_probit_ols (margins, broom)
+#> Packages: conditional_expectation (purrr, tibble); conjoint (rdss, cjoint); diff_in_diff (rdss, DIDmultiplegt); italian_village_bayes (rdss, rstanarm); logit_probit_ols (margins, broom); matching (MatchIt); multi_site_studies (metafor); multilevel (rdss, lme4, dplyr, tibble); network_experiment (rdss, spdep, interference, tidyverse); process_tracing (rdss, CausalQueries); multilevel_answer_strategies (rdss, lme4, dplyr, tibble); regression_discontinuity (rdss, rdrobust); regression_discontinuity_fuzzy (rdss, rdrobust); structural_estimation (bbmle)
 #> 
 #> See design_info("id") or get_args("id") for details;
 #> as.data.frame(list_designs()) for the full table.
@@ -168,4 +174,6 @@ refresh_library()
 ```
 
 That is the whole loop: drop in a design file, use it from R or Shiny,
-and refresh the library when you change the set.
+and refresh the library when you change the set. Step-by-step
+contribution guidance is in
+[`vignette("contributing", package = "ResearchDesigns")`](https://macartan.github.io/ResearchDesigns/articles/contributing.md).
