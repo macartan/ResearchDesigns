@@ -1,4 +1,4 @@
----
+﻿---
 id: audit_intervention
 alias: "17.2"
 label: audit intervention
@@ -6,8 +6,6 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment intervention study design. (chapter 17).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num2
 include_in_shiny: true
 ---

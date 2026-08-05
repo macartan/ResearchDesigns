@@ -8,7 +8,6 @@ description: >
 params:
   "citizens_per_village": "Citizens sampled per village"
   "n_villages": "Number of villages in the sample"
-  "se_type": "Standard-error type passed to lm_robust (e.g. stata)"
 include_in_shiny: false
 ---
 

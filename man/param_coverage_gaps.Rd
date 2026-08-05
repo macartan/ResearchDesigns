@@ -21,7 +21,8 @@ Runs the design, reads \code{\link[=discover_design_params]{discover_design_para
 assignments before \verb{design <-}. Flags names that are used in the design body
 (or seen by DeclareDesignZero's object finder) but not in the redesignable
 parameter list.
-
-Design steps (MIDA pieces built with \code{declare_*}, etc.) and helper functions
+}
+\details{
+Design steps (MIDA pieces built with \verb{declare_*}, etc.) and helper functions
 are not parameters and are omitted unless \code{include_steps = TRUE}.
 }

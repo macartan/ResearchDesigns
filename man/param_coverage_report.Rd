@@ -4,7 +4,11 @@
 \alias{param_coverage_report}
 \title{Report declared-before-design objects missing from design parameters}
 \usage{
-param_coverage_report(designs = NULL, atomic_only = FALSE, include_steps = FALSE)
+param_coverage_report(
+  designs = NULL,
+  atomic_only = FALSE,
+  include_steps = FALSE
+)
 }
 \arguments{
 \item{designs}{Ids/aliases, or \code{NULL} for all.}
@@ -20,6 +24,5 @@ A data frame (class \code{research_designs_param_coverage}) of gaps.
 \description{
 For each library design: evaluate the file, read redesignable parameters from
 the design object, and list top-level objects that are used by the design but
-do not appear in that parameter list. Design steps and helper functions are
-omitted by default.
+do not appear in that parameter list.
 }

@@ -1,12 +1,10 @@
----
+﻿---
 id: declaration_using_declare
 alias: "10.1"
 label: Example of declaration using Declare
 category: rdss
 description: >
   Example of declaration using DeclareDesign (chapter 10).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/diagnosing-designs.html#def-ch10num1
 include_in_shiny: false
 ---

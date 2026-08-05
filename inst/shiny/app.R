@@ -434,7 +434,7 @@ contribute_yaml_tips <- function() {
       "List of search terms, e.g. [experiment, blocking].",
       "Extra R packages the design needs beyond DeclareDesignZero, e.g. [margins, broom].",
       "Preferred display diagnosands, e.g. [rmse, bias]. Prefix with - to hide one (rmse, -bias, power).",
-      "Map parameter names to tip strings. Always quote keys: \"N\": \"Sample size\". Names must match redesignable parameters.",
+      "Map parameter names to tip strings. Always quote keys: \"N\": \"Sample size\". Only top-level assignments before design <- count (N <- 1000), not literals inside declare_*(N = 1000). No design-step names.",
       "URL to a book section or external docs.",
       "true (default) or false. Set false for incomplete or heavy designs.",
       "true (default) or false. Set false to park a design (e.g. unavailable packages); skips audit/smoke/install and forces include_in_shiny false.",
@@ -601,10 +601,7 @@ ui_body <- if (has_bslib) {
     bslib::nav_panel("Redesign", div(class = "rd-wrap", redesign_panel())),
     bslib::nav_spacer(),
     bslib::nav_panel("Contribute", div(class = "rd-wrap", contribute_panel())),
-    bslib::nav_panel("About", div(class = "rd-wrap", about_panel())),
-    bslib::nav_item(tags$a(href = DECLAREDESIGN_URL, target = "_blank", "DeclareDesign")),
-    bslib::nav_item(tags$a(href = BOOK_URL, target = "_blank", "Book")),
-    bslib::nav_item(tags$a(href = PKGDOWN_URL, target = "_blank", "Docs"))
+    bslib::nav_panel("About", div(class = "rd-wrap", about_panel()))
   )
 } else {
   fluidPage(
@@ -721,11 +718,23 @@ server <- function(input, output, session) {
     selected = "all"
   )
 
+  html_escape <- function(x) {
+    x <- as.character(x %||% "")
+    x[is.na(x)] <- ""
+    x <- gsub("&", "&amp;", x, fixed = TRUE)
+    x <- gsub("<", "&lt;", x, fixed = TRUE)
+    x <- gsub(">", "&gt;", x, fixed = TRUE)
+    x <- gsub("\"", "&quot;", x, fixed = TRUE)
+    x
+  }
+
   filtered_idx <- reactive({
     df <- as.data.frame(idx_all)
-    cat_sel <- input$lib_category %||% "all"
-    if (!identical(cat_sel, "all")) {
-      df <- df[df$category == cat_sel, , drop = FALSE]
+    cat_sel <- trimws(as.character(input$lib_category %||% "all"))
+    if (!nzchar(cat_sel) || identical(cat_sel, "all")) {
+      # keep all
+    } else {
+      df <- df[as.character(df$category) == cat_sel, , drop = FALSE]
     }
     q <- trimws(input$lib_search %||% "")
     if (nzchar(q)) {
@@ -760,7 +769,9 @@ server <- function(input, output, session) {
   library_display <- reactive({
     df <- filtered_idx()
     ids <- as.character(df$id)
-    labels <- as.character(df$label %||% ids)
+    labels <- as.character(df$label)
+    bad_lab <- is.na(labels) | !nzchar(labels)
+    labels[bad_lab] <- ids[bad_lab]
     label_html <- vapply(seq_along(ids), function(i) {
       id <- ids[[i]]
       href <- paste0("?design=", utils::URLencode(id, reserved = TRUE))
@@ -776,12 +787,14 @@ server <- function(input, output, session) {
         permalink_svg
       )
     }, character(1))
+    alias <- as.character(df$alias)
+    alias[is.na(alias)] <- ""
     data.frame(
       label = if (has_dt) label_html else labels,
-      alias = df$alias,
-      category = df$category,
-      params = df$params,
-      packages = df$packages,
+      alias = alias,
+      category = as.character(df$category %||% ""),
+      params = as.character(df$params %||% ""),
+      packages = as.character(df$packages %||% ""),
       stringsAsFactors = FALSE,
       .id_key = ids,
       check.names = FALSE
@@ -800,15 +813,6 @@ server <- function(input, output, session) {
       info <- ResearchDesigns::design_info(key)
       as.character(info$id[[1]])
     }, error = function(e) NA_character_)
-  }
-
-  html_escape <- function(x) {
-    x <- as.character(x)
-    x <- gsub("&", "&amp;", x, fixed = TRUE)
-    x <- gsub("<", "&lt;", x, fixed = TRUE)
-    x <- gsub(">", "&gt;", x, fixed = TRUE)
-    x <- gsub("\"", "&quot;", x, fixed = TRUE)
-    x
   }
 
   design_query <- function(id) {
@@ -879,15 +883,17 @@ server <- function(input, output, session) {
           lengthChange = FALSE,
           autoWidth = FALSE,
           scrollX = TRUE,
+          # Search/filter is handled by lib_search / lib_category above
+          searching = FALSE,
           order = list(),  # keep template-first row order from filtered_idx()
           ordering = TRUE,
+          # Must match the 5 columns in `show` (id column was removed)
           columnDefs = list(
-            list(width = "30%", targets = 0),  # label
-            list(width = "14%", targets = 1),  # id (linked)
-            list(width = "7%", targets = 2),   # alias
-            list(width = "12%", targets = 3),  # category
-            list(width = "20%", targets = 4),  # params
-            list(width = "17%", targets = 5)   # packages
+            list(width = "34%", targets = 0),  # label (+ permalink)
+            list(width = "10%", targets = 1),  # alias
+            list(width = "12%", targets = 2),  # category
+            list(width = "24%", targets = 3),  # params
+            list(width = "20%", targets = 4)   # packages
           ),
           # Hide Previous/Next when everything fits on one page
           drawCallback = DT::JS(

@@ -132,7 +132,7 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
     if (isTRUE(discover_params) && isTRUE(m$functional)) {
       params <- tryCatch({
         design <- eval_design(parsed)
-        pnames <- discover_design_params(design)$name
+        pnames <- discover_design_params(design, code = parsed$code)$name
         if (!length(pnames)) "" else paste(pnames, collapse = ", ")
       }, error = function(e) NA_character_)
     }
@@ -374,10 +374,11 @@ make_design <- function(design = "two_arm_trial", ...) {
   # When formals are the full library vector (set in .onLoad for IDE completion),
   # a bare make_design() call receives that vector — use the first id.
   if (length(design) > 1L) design <- design[[1L]]
-  d <- eval_design(resolve_design(design))
+  parsed <- resolve_design(design)
+  d <- eval_design(parsed)
   dots <- list(...)
   if (!length(dots)) return(d)
-  unknown <- setdiff(names(dots), discover_design_params(d)$name)
+  unknown <- setdiff(names(dots), discover_design_params(d, code = parsed$code)$name)
   unknown <- unknown[nzchar(unknown %||% "")]
   if (length(unknown)) {
     stop(
@@ -402,7 +403,7 @@ get_args <- function(design) {
   if (length(design) > 1L) design <- design[[1L]]
   parsed <- resolve_design(design)
   d <- eval_design(parsed)
-  build_args_table(parsed$meta, d)
+  build_args_table(parsed$meta, d, code = parsed$code)
 }
 
 #' Code for a design: simple `make_design()` call and/or full source

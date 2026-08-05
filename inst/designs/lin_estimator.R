@@ -7,7 +7,6 @@ keywords: [experiment, causal]
 description: >
   Lin estimator design. (chapter 18).
 params:
-  "N": "Number of units (sample or population size)"
   "control_slope": "Slope of the control outcome surface on the covariate"
   "prob": "Probability of assignment to treatment"
 book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num3

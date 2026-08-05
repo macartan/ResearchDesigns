@@ -1,12 +1,10 @@
----
+﻿---
 id: two_arm_randomized_experiment
 alias: "13.2"
 label: Declaration of two-arm randomized experiment
 category: rdss
 description: >
   Declaration of two-arm randomized experiment (chapter 13).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaration-in-code.html#def-ch13num2
 include_in_shiny: false
 ---

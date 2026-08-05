@@ -1,12 +1,10 @@
----
+﻿---
 id: linear_regression
 alias: "13.1"
 label: Linear regression
 category: rdss
 description: >
   Linear regression design (chapter 13).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaration-in-code.html#def-ch13num1
 include_in_shiny: false
 ---

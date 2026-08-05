@@ -1,4 +1,4 @@
----
+﻿---
 id: list_experiment
 alias: "17.3"
 label: list experiment
@@ -6,8 +6,6 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   List experiment design. (chapter 17).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num3
 include_in_shiny: true
 ---

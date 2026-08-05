@@ -10,7 +10,6 @@ description: >
   effects and identifies which variables are mostly commonly used to
   predict causal effects.
 params:
-  "N": "Number of units (sample or population size)"
   "covariate_names": "Names of covariates used by the learner"
   "share_train": "Share of data used for training"
 book_link: https://book.declaredesign.org/library/complex.html#def-ch19num1

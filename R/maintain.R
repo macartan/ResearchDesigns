@@ -11,8 +11,8 @@ contributor_checklist <- function() {
     "YAML frontmatter is optional. If present, may set id, alias (book ref), label, category, keywords, packages, diagnosands, include_in_shiny, functional, book_link, params; object: only if the design is not named `design`.",
     "No YAML is fine: id = filename stem, label = humanized id, category = Other, object = design, include_in_shiny = TRUE, functional = TRUE.",
     "Set functional: false to park a design (e.g. unavailable dependencies). Skipped by audit, smoke tests, and dependency install; forces include_in_shiny: false.",
-    "The design object is the source of truth for editable parameters.",
-    "YAML params map names to tip strings; always quote keys (e.g. \"N\": \"Sample size\", \"b\": \"Effect size\"); names must match design parameters (no extras).",
+    "The design object is the source of truth for editable parameters: only names assigned before `design <-` (e.g. N <- 1000; declare_model(N = N, ...)) count. Literals inside declare_* (e.g. declare_model(N = 1000)) are not parameters.",
+    "YAML params map names to tip strings; always quote keys (e.g. \"N\": \"Sample size\", \"b\": \"Effect size\"); names must match those redesignable parameters (no extras). Design steps (model_*, inquiry_*, etc.) are not params.",
     "Optional diagnosands: preferred display diagnosands (e.g. diagnosands: rmse, bias or [rmse, bias]); prefix with - to exclude (rmse, -bias, power). Shiny Diagnosis and Redesign use these defaults.",
     "Extra packages listed under packages: and available to install.",
     "Design evaluates under DeclareDesignZero; redesign() works for documented parameters.",
@@ -170,7 +170,7 @@ audit_designs <- function(
     row$load_ok <- TRUE
 
     v <- tryCatch(
-      validate_params_against_design(parsed$meta, design),
+      validate_params_against_design(parsed$meta, design, code = parsed$code),
       error = function(e) e
     )
     if (inherits(v, "error")) {
@@ -252,10 +252,7 @@ order_audit_results <- function(results) {
   rank <- vapply(results, function(r) {
     if (!isTRUE(r$ok)) return(1L)
     if (isTRUE(r$skipped)) return(2L)
-    has_notes <- length(r$missing_docs) ||
-      length(r$coverage_gaps) ||
-      length(r$coverage_gaps_atomic) ||
-      length(r$extra_docs)
+    has_notes <- length(r$missing_docs) || length(r$coverage_gaps_atomic) || length(r$extra_docs)
     if (has_notes) return(3L)
     4L
   }, integer(1))
@@ -283,25 +280,18 @@ format_audit_result_line <- function(r) {
   }
   extras <- character(0)
   if (length(r$extra_docs)) {
-    extras <- c(extras, paste0("     extra YAML params: ", paste(r$extra_docs, collapse = ", ")))
+    extras <- c(extras, paste0("     YAML tip for non-param: ", paste(r$extra_docs, collapse = ", ")))
   }
   if (length(r$missing_docs)) {
-    extras <- c(extras, paste0("     undocumented params (ok): ", paste(r$missing_docs, collapse = ", ")))
+    extras <- c(extras, paste0("     no YAML tip (ok): ", paste(r$missing_docs, collapse = ", ")))
   }
+  # Only atomic gaps are actionable; design steps/helpers are filtered upstream
   if (length(r$coverage_gaps_atomic)) {
     extras <- c(
       extras,
       paste0(
-        "     declared+used but not in design params (atomic): ",
+        "     assigned before design but not redesignable: ",
         paste(r$coverage_gaps_atomic, collapse = ", ")
-      )
-    )
-  } else if (length(r$coverage_gaps)) {
-    extras <- c(
-      extras,
-      paste0(
-        "     declared+used but not in design params: ",
-        paste(r$coverage_gaps, collapse = ", ")
       )
     )
   }
@@ -370,7 +360,10 @@ write_audit_report <- function(x, dir = NULL) {
     "",
     "Issue types: `missing_packages`, `yaml_extra_params`, `param_discovery`, `load_error`, `missing_object`, `diagnose_failed`, `disabled`, `other`.",
     "",
-    "Soft notes (do not fail the audit): undocumented params, coverage gaps.",
+    "Soft notes (do not fail the audit):",
+    "- `no YAML tip`: redesignable param has no tip string in YAML (optional).",
+    "- `assigned before design but not redesignable`: top-level `name <- ...` is used by the design but `redesign()` cannot change it (often a fixed vector/data object).",
+    "Design steps (`declare_*` pieces) and helper functions are not parameters and are not listed.",
     "Parked designs (`functional: false`) are listed under Disabled and do not count as failures.",
     "Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.",
     ""
@@ -401,9 +394,9 @@ write_audit_report <- function(x, dir = NULL) {
           lines,
           paste0("- **", r$id, "**", if (!is.null(r$alias) && length(r$alias) && !is.na(r$alias)) paste0(" (`", r$alias, "`)") else ""),
           paste0("  - ", r$error %||% "(no message)"),
-          if (length(r$extra_docs)) paste0("  - extra YAML: ", paste(r$extra_docs, collapse = ", ")) else NULL,
+          if (length(r$extra_docs)) paste0("  - YAML tip for non-param: ", paste(r$extra_docs, collapse = ", ")) else NULL,
           if (length(r$coverage_gaps_atomic)) {
-            paste0("  - atomic coverage gaps: ", paste(r$coverage_gaps_atomic, collapse = ", "))
+            paste0("  - assigned but not redesignable: ", paste(r$coverage_gaps_atomic, collapse = ", "))
           } else {
             NULL
           },
@@ -415,17 +408,17 @@ write_audit_report <- function(x, dir = NULL) {
 
   notes <- Filter(function(r) {
     isTRUE(r$ok) && !isTRUE(r$skipped) &&
-      (length(r$missing_docs) || length(r$coverage_gaps) || length(r$coverage_gaps_atomic))
+      (length(r$missing_docs) || length(r$coverage_gaps_atomic))
   }, ordered)
   if (length(notes)) {
     lines <- c(lines, "## Soft notes (OK designs)", "")
     for (r in notes) {
       bits <- character(0)
-      if (length(r$missing_docs)) bits <- c(bits, paste0("undocumented: ", paste(r$missing_docs, collapse = ", ")))
+      if (length(r$missing_docs)) {
+        bits <- c(bits, paste0("no YAML tip: ", paste(r$missing_docs, collapse = ", ")))
+      }
       if (length(r$coverage_gaps_atomic)) {
-        bits <- c(bits, paste0("atomic gaps: ", paste(r$coverage_gaps_atomic, collapse = ", ")))
-      } else if (length(r$coverage_gaps)) {
-        bits <- c(bits, paste0("gaps: ", paste(r$coverage_gaps, collapse = ", ")))
+        bits <- c(bits, paste0("assigned but not redesignable: ", paste(r$coverage_gaps_atomic, collapse = ", ")))
       }
       lines <- c(lines, paste0("- **", r$id, "**: ", paste(bits, collapse = "; ")))
     }

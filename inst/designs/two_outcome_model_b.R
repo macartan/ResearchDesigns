@@ -1,12 +1,10 @@
----
+﻿---
 id: two_outcome_model_b
 alias: "10.3b"
 label: Two-outcome model B
 category: rdss
 description: >
   10.3 (chapter 10).
-params:
-  "N": "Number of units (sample or population size)"
 include_in_shiny: false
 ---
 

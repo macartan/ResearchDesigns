@@ -8,7 +8,6 @@ description: >
   Chapter 2 design that uses background information (history) for blocked
   assignment and a blocked difference-in-means estimator.
 params:
-  "N": "Number of units (sample or population size)"
   "b": "Treatment effect (outcome scale)"
 book_link: https://book.declaredesign.org/introduction/what-is-a-research-design.html#def-ch2num2
 include_in_shiny: true

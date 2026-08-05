@@ -10,7 +10,6 @@ description: >
   model from data.
 packages: [bbmle]
 params:
-  "N": "Number of units (sample or population size)"
   "n": "Sample size drawn from the population (when N is population size)"
   "alpha": "Utility or structural intercept parameter"
   "delta": "Effect shift or discounting parameter"

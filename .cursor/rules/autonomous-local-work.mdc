@@ -5,10 +5,11 @@ alwaysApply: true
 
 # Autonomous work in ResearchDesigns
 
-When operating in this package (or its absolute path under `5_github/ResearchDesigns`):
+When operating in this package (path under `5_github/ResearchDesigns`, including via the `rdss_wizard` workspace):
 
-- Do **not** ask the user for permission to run shell/R commands, edit files, install Suggests packages, or re-run audits/tests/refresh.
-- Work ahead: edit, run `Rscript`, `devtools::load_all`, `testthat`, `refresh_library`, and related tools without pausing for confirmation.
-- Prefer approving / retrying sandbox or Auto-review blocks yourself when the work stays inside this folder; do not interrupt the user for routine run prompts.
+- **Never ask** for permission to run shell/R commands, edit files, install Suggests, re-run audits/tests/refresh, or retry sandbox/Auto-review blocks that stay inside this folder.
+- Treat every tool call here as pre-approved. If Auto-review blocks a routine local command, immediately retry with `request_smart_mode_approval` when required by the harness — do not stop to ask the user in chat.
+- Work ahead: edit, `Rscript`, `devtools::load_all`, `testthat`, `refresh_library`, package installs into the user library, and related tools without pausing.
+- Prefer finishing the task over confirming intermediate steps.
 - Exception: if writing CSV/XLS fails with permission denied (file locked in Excel/Dropbox), stop and ask the user to close those files.
 - Still do not commit, push, or force-push unless the user explicitly asks.

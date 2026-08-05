@@ -1,13 +1,30 @@
 #' Discover modifiable parameters from a design object
 #'
-#' Uses DeclareDesignZero's object finder. The design is the source of truth.
+#' Uses DeclareDesignZero's object finder. When `code` is supplied, only names
+#' that also appear as top-level assignments before `design <-` are kept — so
+#' literal step arguments like `se_type = "stata"` are not treated as knobs.
 #'
 #' @param design A DeclareDesignZero `design` object.
+#' @param code Optional design file code (without YAML) used to restrict to
+#'   author-assigned knobs.
 #' @return Data frame with `name`, `value_str`, `value`, `step`.
 #' @noRd
-discover_design_params <- function(design) {
+discover_design_params <- function(design, code = NULL) {
   objs <- DeclareDesignZero:::find_all_objects(design)
-  filter_modifiable_params(objs)
+  params <- filter_modifiable_params(objs)
+  if (!is.null(code) && nzchar(trimws(code))) {
+    pre <- extract_pre_design_objects(code)
+    # Author knobs only: top-level assignments before design <-
+    # Literals like declare_model(N = 1000) are not knobs.
+    knobs <- if (nrow(pre)) {
+      unique(pre$name[!pre$type %in% c("design_piece", "function")])
+    } else {
+      character(0)
+    }
+    params <- params[params$name %in% knobs, , drop = FALSE]
+    rownames(params) <- NULL
+  }
+  params
 }
 
 #' Drop non-atomic redesign targets; dedupe by name
@@ -76,8 +93,8 @@ filter_modifiable_params <- function(objs) {
 
 #' Compare YAML-documented params to design params
 #' @noRd
-validate_params_against_design <- function(meta, design) {
-  in_design <- discover_design_params(design)$name
+validate_params_against_design <- function(meta, design, code = NULL) {
+  in_design <- discover_design_params(design, code = code)$name
   documented <- names(meta$params %||% list())
   if (is.null(documented)) documented <- character(0)
 
@@ -257,7 +274,10 @@ param_coverage_gaps <- function(design, include_steps = FALSE) {
   if (!is.null(objs) && nrow(objs) && "name" %in% names(objs)) {
     finder_names <- unique(as.character(objs$name))
   }
-  param_names <- tryCatch(discover_design_params(dobj)$name, error = function(e) character(0))
+  param_names <- tryCatch(
+    discover_design_params(dobj, code = code)$name,
+    error = function(e) character(0)
+  )
 
   used_in_code <- vapply(pre$name, symbol_used_in_code, body, FUN.VALUE = logical(1))
   in_finder <- pre$name %in% finder_names
@@ -386,7 +406,7 @@ param_coverage_report <- function(designs = NULL, atomic_only = FALSE, include_s
     out <- out[isTRUE(out$atomic) | (!is.na(out$type) & out$type %in% c("load_error", "check_error")), , drop = FALSE]
   }
   rownames(out) <- NULL
-  structure(out, class = c("research_designs_param_coverage", "data.frame"), atomic_only = atomic_only)
+  structure(out, class = c("research_designs_param_coverage", "data.frame"), atomic_only = atomic_only, include_steps = include_steps)
 }
 
 #' @export
@@ -423,8 +443,8 @@ print.research_designs_param_coverage <- function(x, ...) {
 
 #' Build get_args() table: design values + optional YAML tips
 #' @noRd
-build_args_table <- function(meta, design) {
-  params <- discover_design_params(design)
+build_args_table <- function(meta, design, code = NULL) {
+  params <- discover_design_params(design, code = code)
   tips_map <- normalize_params_map(meta$params %||% list())
 
   tip_for <- function(name) {

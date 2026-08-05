@@ -1,4 +1,4 @@
----
+﻿---
 id: audit_experiment
 alias: "17.1"
 label: audit experiment
@@ -6,8 +6,6 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment design. (chapter 17).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num1
 include_in_shiny: true
 ---

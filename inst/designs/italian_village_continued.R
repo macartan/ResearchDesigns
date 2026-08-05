@@ -6,7 +6,6 @@ category: rdss
 description: >
   Italian village design, continued (chapter 9).
 params:
-  "N": "Number of units (sample or population size)"
   "linear_hypothesis": "Linear hypothesis tested (lh_robust)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/choosing-answer-strategy.html#def-ch9num2
 include_in_shiny: false

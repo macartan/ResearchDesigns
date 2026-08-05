@@ -1,12 +1,10 @@
----
+﻿---
 id: example_declaration
 alias: "5.1"
 label: Example declaration
 category: rdss
 description: >
   Example declaration (chapter 5).
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaring-designs.html#def-ch5num1
 include_in_shiny: false
 ---

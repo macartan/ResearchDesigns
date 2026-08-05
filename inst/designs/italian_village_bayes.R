@@ -1,4 +1,4 @@
----
+﻿---
 id: italian_village_bayes
 alias: "9.3"
 label: Italian village  a la Bayes.
@@ -6,8 +6,6 @@ category: rdss
 description: >
   Italian village design a la Bayes. (chapter 9).
 packages: [rdss, rstanarm]
-params:
-  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/choosing-answer-strategy.html#def-ch9num3
 include_in_shiny: false
 ---

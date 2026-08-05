@@ -6,7 +6,6 @@ category: rdss
 description: >
   10.4 (chapter 10).
 params:
-  "N": "Number of units (sample or population size)"
   "effect_size": "Treatment effect size"
 include_in_shiny: false
 ---

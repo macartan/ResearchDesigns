@@ -1,12 +1,10 @@
----
+﻿---
 id: design_10_2
 alias: "10.2"
 label: design 10 2
 category: rdss
 description: >
   10.2 (chapter 10).
-params:
-  "N": "Number of units (sample or population size)"
 include_in_shiny: false
 ---
 
