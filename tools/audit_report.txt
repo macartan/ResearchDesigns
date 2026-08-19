@@ -1,18 +1,6 @@
-ResearchDesigns audit: 51/58 ok, 1 parked, 6 failed
+ResearchDesigns audit: 57/58 ok, 1 parked
 (Order: FAIL, SKIP/parked, OK-with-notes, OK)
 
- - italian_village_continued: FAIL [yaml_extra_params] - YAML params not in design: linear_hypothesis
-     YAML tip for non-param: linear_hypothesis
- - multi_site_studies: FAIL [yaml_extra_params] - YAML params not in design: method
-     YAML tip for non-param: method
- - population_estimands: FAIL [yaml_extra_params] - YAML params not in design: superpopulation_mean
-     YAML tip for non-param: superpopulation_mean
- - process_tracing: FAIL [yaml_extra_params] - YAML params not in design: query
-     YAML tip for non-param: query
- - random_forests: FAIL [yaml_extra_params] - YAML params not in design: share_train
-     YAML tip for non-param: share_train
- - structural_estimation: FAIL [yaml_extra_params] - YAML params not in design: method
-     YAML tip for non-param: method
  - network_experiment: SKIP [disabled] - functional: false (parked; skipped by audit)
  - cluster_random_sampling: OK
      no YAML tip (ok): locality_shock, individual_shock
@@ -37,6 +25,7 @@ ResearchDesigns audit: 51/58 ok, 1 parked, 6 failed
  - instrumental_variables: OK
  - italian_village: OK
  - italian_village_bayes: OK
+ - italian_village_continued: OK
  - latent_variables: OK
  - lin_estimator: OK
  - linear_regression: OK
@@ -44,9 +33,13 @@ ResearchDesigns audit: 51/58 ok, 1 parked, 6 failed
  - list_or_direct_questions: OK
  - logit_probit_ols: OK
  - matching: OK
+ - multi_site_studies: OK
  - multilevel: OK
  - multilevel_answer_strategies: OK
  - pate_with_sampling: OK
+ - population_estimands: OK
+ - process_tracing: OK
+ - random_forests: OK
  - randomization_inference: OK
  - randomized_saturation: OK
  - regression_discontinuity: OK
@@ -54,6 +47,7 @@ ResearchDesigns audit: 51/58 ok, 1 parked, 6 failed
  - simple_random_sampling: OK
  - single_period_two_arm: OK
  - stepped_wedge: OK
+ - structural_estimation: OK
  - subgroup_effects: OK
  - survey_nonresponse: OK
  - trust_game: OK

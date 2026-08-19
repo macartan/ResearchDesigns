@@ -1,6 +1,6 @@
 # ResearchDesigns audit report
 
-Summary: **51/58** designs OK, **1** parked (`functional: false`), **6** failed.
+Summary: **57/58** designs OK, **1** parked (`functional: false`).
 
 Issue types: `missing_packages`, `yaml_extra_params`, `param_discovery`, `load_error`, `missing_object`, `diagnose_failed`, `disabled`, `other`.
 
@@ -17,31 +17,7 @@ Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.
 
 ## Failures
 
-### yaml_extra_params
-
-- **italian_village_continued** (`9.2`)
-  - YAML params not in design: linear_hypothesis
-  - YAML tip for non-param: linear_hypothesis
-
-- **multi_site_studies** (`19.4`)
-  - YAML params not in design: method
-  - YAML tip for non-param: method
-
-- **population_estimands** (`7.1`)
-  - YAML params not in design: superpopulation_mean
-  - YAML tip for non-param: superpopulation_mean
-
-- **process_tracing** (`16.1b`)
-  - YAML params not in design: query
-  - YAML tip for non-param: query
-
-- **random_forests** (`19.1`)
-  - YAML params not in design: share_train
-  - YAML tip for non-param: share_train
-
-- **structural_estimation** (`19.2`)
-  - YAML params not in design: method
-  - YAML tip for non-param: method
+_None._
 
 ## Soft notes (OK designs)
 
