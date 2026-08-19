@@ -15,6 +15,8 @@ params:
   "alpha": "Utility or structural intercept parameter"
   "delta": "Effect shift or discounting parameter"
   "kappa": "Structural / scale parameter"
+  "offer": "Function: equilibrium offer given bargaining rounds and discount factor (R-only)"
+  "likelihood": "Function: negative log-likelihood for structural MLE (R-only)"
 book_link: https://book.declaredesign.org/library/complex.html#def-ch19num2
 include_in_shiny: true
 ---

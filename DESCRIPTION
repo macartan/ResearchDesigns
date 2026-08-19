@@ -1,6 +1,6 @@
 Package: ResearchDesigns
 Title: A Library of Declared Designs
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Macartan", "Humphreys",
                   email = "macartan.humphreys@wzb.eu",
                   role = c("aut", "cre"))

@@ -12,63 +12,306 @@ contributor_checklist <- function() {
     "No YAML is fine: id = filename stem, label = humanized id, category = Other, object = design, include_in_shiny = TRUE, functional = TRUE.",
     "Set functional: false to park a design (e.g. unavailable dependencies). Skipped by audit, smoke tests, and dependency install; forces include_in_shiny: false.",
     "The design object is the source of truth for editable parameters: only names assigned before `design <-` (e.g. N <- 1000; declare_model(N = N, ...)) count. Literals inside declare_* (e.g. declare_model(N = 1000)) are not parameters.",
+    "Scalar parameters (N <- 100) can be swept with redesign(N = c(50, 100)). Vector parameters (probs <- c(.1, .2, .3)) are replaced as a whole; the browser edits them as a comma-separated list. Data frames and matrices are package parameters (make_design(..., data = ...)), not Shiny controls — prefer `data <- example_pop` over naming the example as the knob.",
     "YAML params map names to tip strings; always quote keys (e.g. \"N\": \"Sample size\", \"b\": \"Effect size\"); names must match those redesignable parameters (no extras). Design steps (model_*, inquiry_*, etc.) are not params.",
     "Optional diagnosands: preferred display diagnosands (e.g. diagnosands: rmse, bias or [rmse, bias]); prefix with - to exclude (rmse, -bias, power). Shiny Diagnosis and Redesign use these defaults.",
     "Extra packages listed under packages: and available to install.",
-    "Design evaluates under DeclareDesignZero; redesign() works for documented parameters.",
+    "Design evaluates under DeclareDesignZero; redesign() works for documented parameters. A design that loads but does not run fails the audit.",
     "Run refresh_library() from the package source tree after adding or editing designs (or set options(ResearchDesigns.root = \"...\"))."
   )
 }
 
-#' Build an in-memory index of all designs
+#' Empty design-index data frame (YAML metadata columns)
+#' @noRd
+empty_design_index <- function() {
+  data.frame(
+    id = character(0),
+    alias = character(0),
+    label = character(0),
+    category = character(0),
+    keywords = character(0),
+    packages = character(0),
+    params = character(0),
+    description = character(0),
+    include_in_shiny = logical(0),
+    functional = logical(0),
+    file = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' Comma-separated param names for the library TOC (no design eval)
 #'
-#' @return A data frame (same columns as [list_designs()], plus description).
-#' @export
-make_index <- function() {
-  files <- design_files()
-  if (!length(files)) {
-    return(data.frame(
-      id = character(0),
-      alias = character(0),
-      label = character(0),
-      category = character(0),
-      keywords = character(0),
-      packages = character(0),
-      description = character(0),
-      include_in_shiny = logical(0),
-      functional = logical(0),
-      file = character(0),
-      stringsAsFactors = FALSE
-    ))
+#' YAML `params:` keys plus top-level assignments before `design <-`,
+#' excluding `declare_*` design pieces. Enough for listing; [get_args()]
+#' remains the source of truth for redesignable names.
+#' @noRd
+index_params_string <- function(parsed) {
+  yaml_nms <- names(parsed$meta$params %||% list())
+  yaml_nms <- as.character(yaml_nms)
+  yaml_nms <- yaml_nms[nzchar(yaml_nms) & !is.na(yaml_nms)]
+  pre <- tryCatch(
+    extract_pre_design_objects(parsed$code %||% ""),
+    error = function(e) NULL
+  )
+  knobs <- if (!is.null(pre) && nrow(pre) && "name" %in% names(pre)) {
+    nms <- as.character(pre$name)
+    typ <- if ("type" %in% names(pre)) as.character(pre$type) else rep("", length(nms))
+    unique(nms[!typ %in% "design_piece" & nzchar(nms) & !is.na(nms)])
+  } else {
+    character(0)
+  }
+  nms <- unique(c(knobs, yaml_nms))
+  if (!length(nms)) "" else paste(nms, collapse = ", ")
+}
+
+#' Fill NA `params` from YAML + pre-design names (no design eval)
+#' @noRd
+fill_missing_index_params <- function(df, files) {
+  if (!is.data.frame(df) || !nrow(df)) return(df)
+  if (!"params" %in% names(df)) {
+    df$params <- rep(NA_character_, nrow(df))
+  }
+  need <- is.na(df$params)
+  if (!any(need)) return(df)
+  names(files) <- basename(files)
+  for (i in which(need)) {
+    f <- unname(files[as.character(df$file[[i]])])
+    if (!length(f) || is.na(f) || !nzchar(f) || !file.exists(f)) next
+    parsed <- tryCatch(parse_design_file(f[[1]]), error = function(e) NULL)
+    if (is.null(parsed)) next
+    df$params[[i]] <- index_params_string(parsed)
+  }
+  df$params[is.na(df$params)] <- ""
+  df
+}
+
+#' Overlay audit-discovered param names onto an index
+#' @noRd
+overlay_audit_params <- function(index, audit) {
+  if (!is.data.frame(index) || !nrow(index)) return(index)
+  if (is.null(audit) || is.null(audit$results) || !length(audit$results)) {
+    return(index)
+  }
+  if (!"params" %in% names(index)) {
+    index$params <- rep("", nrow(index))
+  }
+  for (r in audit$results) {
+    p <- r$params
+    if (is.null(p) || !length(p)) next
+    p <- as.character(p)
+    p <- p[nzchar(p) & !is.na(p)]
+    if (!length(p)) next
+    hit <- which(as.character(index$id) == as.character(r$id[[1]]))
+    if (!length(hit)) next
+    index$params[[hit[[1]]]] <- paste(p, collapse = ", ")
+  }
+  index
+}
+
+#' One index row from a design file (YAML + cheap param names; no design eval)
+#' @noRd
+index_row_from_path <- function(path) {
+  parsed <- parse_design_file(path)
+  m <- parsed$meta
+  pkgs <- m$packages %||% character(0)
+  pkgs <- pkgs[nzchar(as.character(pkgs))]
+  data.frame(
+    id = m$id,
+    alias = if (is.null(m$alias) || (length(m$alias) == 1L && is.na(m$alias))) {
+      NA_character_
+    } else {
+      as.character(m$alias)[[1]]
+    },
+    label = as.character(m$label)[[1]],
+    category = as.character(m$category %||% "Other")[[1]],
+    keywords = paste(m$keywords %||% character(0), collapse = ", "),
+    packages = if (!length(pkgs)) "" else paste(pkgs, collapse = ", "),
+    params = index_params_string(parsed),
+    description = if (is.null(m$description) || (length(m$description) == 1L && is.na(m$description))) {
+      NA_character_
+    } else {
+      as.character(m$description)[[1]]
+    },
+    include_in_shiny = isTRUE(m$include_in_shiny),
+    functional = isTRUE(m$functional),
+    file = basename(path),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' YAML scan of design files (shared by make_index and overlay)
+#' @noRd
+design_index_from_files <- function(files) {
+  if (!length(files)) return(empty_design_index())
+  rows <- lapply(files, index_row_from_path)
+  normalize_index_df(do.call(rbind, rows))
+}
+
+#' Coerce a data frame to public make_index() columns and types
+#' @noRd
+normalize_index_df <- function(df) {
+  if (is.null(df) || !is.data.frame(df) || !nrow(df)) {
+    return(empty_design_index())
+  }
+  needed <- names(empty_design_index())
+  for (nm in needed) {
+    if (!nm %in% names(df)) {
+      df[[nm]] <- if (nm %in% c("include_in_shiny", "functional")) {
+        rep(TRUE, nrow(df))
+      } else {
+        rep(NA_character_, nrow(df))
+      }
+    }
+  }
+  chr_cols <- c(
+    "id", "alias", "label", "category", "keywords", "packages", "params",
+    "description", "file"
+  )
+  for (nm in chr_cols) {
+    df[[nm]] <- as.character(df[[nm]])
+  }
+  df$alias[!nzchar(df$alias %||% "")] <- NA_character_
+  df$description[!nzchar(df$description %||% "")] <- NA_character_
+  df$include_in_shiny <- vapply(
+    df$include_in_shiny,
+    function(x) yaml_is_true(x, default = FALSE),
+    logical(1)
+  )
+  df$functional <- vapply(
+    df$functional,
+    function(x) yaml_is_true(x, default = FALSE),
+    logical(1)
+  )
+  df <- df[needed]
+  rownames(df) <- NULL
+  df
+}
+
+#' Paths to baked index artifacts
+#' @noRd
+baked_index_paths <- function() {
+  dir <- tryCatch(library_index_dir(), error = function(e) "")
+  if (!nzchar(dir)) {
+    return(list(rds = "", csv = ""))
+  }
+  list(
+    rds = file.path(dir, "designs_index.rds"),
+    csv = file.path(dir, "designs_index.csv")
+  )
+}
+
+#' Read baked library index (CSV first, then RDS). NULL if missing.
+#'
+#' CSV is the git artifact and is safer on Dropbox than a half-written RDS.
+#' @noRd
+read_baked_index <- function() {
+  paths <- baked_index_paths()
+  df <- NULL
+  artifact_mtime <- NULL
+  source_mtimes <- NULL
+
+  take <- function(obj, mtime) {
+    if (!is.data.frame(obj) || !"file" %in% names(obj)) {
+      return(FALSE)
+    }
+    df <<- obj
+    artifact_mtime <<- mtime
+    source_mtimes <<- attr(obj, "source_mtimes")
+    if (is.null(source_mtimes) && "file_mtime" %in% names(obj) && "file" %in% names(obj)) {
+      source_mtimes <<- stats::setNames(as.numeric(obj$file_mtime), as.character(obj$file))
+    }
+    TRUE
   }
 
-  rows <- lapply(files, function(path) {
-    m <- parse_design_file(path)$meta
-    pkgs <- m$packages %||% character(0)
-    pkgs <- pkgs[nzchar(as.character(pkgs))]
-    data.frame(
-      id = m$id,
-      alias = if (is.null(m$alias) || (length(m$alias) == 1L && is.na(m$alias))) {
-        NA_character_
-      } else {
-        as.character(m$alias)[[1]]
-      },
-      label = as.character(m$label)[[1]],
-      category = as.character(m$category %||% "Other")[[1]],
-      keywords = paste(m$keywords %||% character(0), collapse = ", "),
-      packages = if (!length(pkgs)) "" else paste(pkgs, collapse = ", "),
-      description = if (is.null(m$description) || (length(m$description) == 1L && is.na(m$description))) {
-        NA_character_
-      } else {
-        as.character(m$description)[[1]]
-      },
-      include_in_shiny = isTRUE(m$include_in_shiny),
-      functional = isTRUE(m$functional),
-      file = basename(path),
-      stringsAsFactors = FALSE
+  if (nzchar(paths$csv) && file.exists(paths$csv)) {
+    csv_df <- tryCatch(
+      utils::read.csv(paths$csv, stringsAsFactors = FALSE, encoding = "UTF-8"),
+      error = function(e) NULL
     )
-  })
-  do.call(rbind, rows)
+    take(csv_df, file.info(paths$csv)$mtime)
+  }
+  if (is.null(df) && nzchar(paths$rds) && file.exists(paths$rds)) {
+    rds_df <- tryCatch(readRDS(paths$rds), error = function(e) NULL)
+    take(rds_df, file.info(paths$rds)$mtime)
+  }
+  if (is.null(df)) return(NULL)
+  list(
+    df = normalize_index_df(df),
+    artifact_mtime = artifact_mtime,
+    source_mtimes = source_mtimes
+  )
+}
+
+#' Baked index plus YAML overlay for extra / missing / newer files
+#'
+#' Returns NULL when there is no usable artifact (caller full-scans).
+#' @noRd
+index_from_baked_overlay <- function(files) {
+  baked <- read_baked_index()
+  if (is.null(baked)) return(NULL)
+
+  live <- basename(files)
+  names(files) <- live
+  baked_files <- as.character(baked$df$file)
+
+  extra <- setdiff(live, baked_files)
+  gone <- setdiff(baked_files, live)
+  both <- intersect(live, baked_files)
+
+  live_mtime <- stats::setNames(as.numeric(file.info(unname(files))$mtime), live)
+  stored <- baked$source_mtimes
+  if (!is.null(stored) && length(stored)) {
+    stored_hit <- as.numeric(stored[both])
+    newer <- both[which(is.na(stored_hit) | (!is.na(live_mtime[both]) & live_mtime[both] > stored_hit))]
+  } else if (!is.null(baked$artifact_mtime) && length(both)) {
+    artifact <- as.numeric(baked$artifact_mtime)
+    newer <- both[which(!is.na(live_mtime[both]) & live_mtime[both] > artifact)]
+  } else {
+    newer <- character(0)
+  }
+
+  if (!length(extra) && !length(gone) && !length(newer)) {
+    return(baked$df)
+  }
+
+  keep <- setdiff(both, newer)
+  kept <- baked$df[baked$df$file %in% keep, , drop = FALSE]
+  to_parse <- unname(files[c(extra, newer)])
+  parsed <- design_index_from_files(to_parse)
+  if (!nrow(kept)) return(parsed)
+  if (!nrow(parsed)) return(normalize_index_df(kept))
+  normalize_index_df(rbind(kept, parsed))
+}
+
+#' Build an in-memory index of all designs
+#'
+#' Shared by [list_designs()] (metadata-only default) and maintainer tools.
+#' When `use_cache = TRUE`, reads the baked `inst/library_index` artifact if
+#' live `.R` filenames match, and YAML-parses only extra, missing, or newer
+#' files so a local `inst/designs/my_design.R` appears without refresh.
+#'
+#' @param use_cache If `TRUE` (default), use the baked index with a live-file
+#'   overlay. If `FALSE`, parse YAML from every design file (used by
+#'   [refresh_library()]).
+#' @return A data frame (same columns as [list_designs()], plus description).
+#'   `params` is a comma-separated name string from the baked index, or from
+#'   YAML `params:` keys plus pre-design assignment names for overlay files.
+#' @export
+make_index <- function(use_cache = TRUE) {
+  files <- design_files()
+  if (!length(files)) return(empty_design_index())
+  out <- NULL
+  if (isTRUE(use_cache)) {
+    out <- tryCatch(index_from_baked_overlay(files), error = function(e) NULL)
+  }
+  if (is.null(out)) {
+    out <- design_index_from_files(files)
+  }
+  out <- fill_missing_index_params(out, files)
+  out <- out[order(as.character(out$file), as.character(out$id)), , drop = FALSE]
+  rownames(out) <- NULL
+  out
 }
 
 #' Classify an audit error message into a coarse issue type
@@ -94,6 +337,11 @@ classify_audit_issue <- function(msg) {
 #' records pre-design objects that are used by the design but missing from the
 #' redesignable parameter list (see [param_coverage_report()]).
 #'
+#' By default each design is diagnosed with a short `diagnose_design()` run
+#' (`sims = 2`). A design that loads but does not run is a failure. Pass
+#' `sims = NULL` only for a load-and-params scan while editing a single file;
+#' `refresh_library()` and the test suite always run the design.
+#'
 #' Failures are collected per design and (by default) written to
 #' `tools/audit_report.csv`, `tools/audit_report.md`, and
 #' `tools/audit_report.txt` (FAIL/SKIP first, then OK) under the package root
@@ -101,14 +349,15 @@ classify_audit_issue <- function(msg) {
 #' do not mark a design as failed.
 #'
 #' @param designs Character vector of ids/aliases, or `NULL` for all.
-#' @param sims If not `NULL`, run a short `diagnose_design()` with this many sims.
+#' @param sims Number of simulations for a short `diagnose_design()` (default
+#'   2). If `NULL`, skip the run check (load and params only).
 #' @param write_report If `TRUE` (default), write CSV + markdown under `tools/`.
 #' @param report_dir Directory for reports; default `tools/` under package root.
 #' @return An object of class `research_designs_audit`.
 #' @export
 audit_designs <- function(
   designs = NULL,
-  sims = NULL,
+  sims = 2,
   write_report = TRUE,
   report_dir = NULL
 ) {
@@ -363,7 +612,7 @@ write_audit_report <- function(x, dir = NULL) {
     "Soft notes (do not fail the audit):",
     "- `no YAML tip`: redesignable param has no tip string in YAML (optional).",
     "- `assigned before design but not redesignable`: top-level `name <- ...` is used by the design but `redesign()` cannot change it (often a fixed vector/data object).",
-    "Design steps (`declare_*` pieces) and helper functions are not parameters and are not listed.",
+    "Design steps (`declare_*` pieces) are not parameters. Functions assigned before `design <-` are R-only parameters.",
     "Parked designs (`functional: false`) are listed under Disabled and do not count as failures.",
     "Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.",
     ""
@@ -510,7 +759,10 @@ bake_previews <- function(designs = NULL, sims = 100) {
   for (i in seq_len(nrow(idx))) {
     id <- idx$id[[i]]
     message("Baking preview: ", id, " (", i, "/", nrow(idx), ")")
-    err <- tryCatch({
+    # Return the written path from tryCatch. Do not use `<<-` here:
+    # tryCatch evaluates in this frame, so `<<-` would skip local `paths`
+    # and refresh_library() would report 0 writes after a successful bake.
+    result <- tryCatch({
       design <- make_design(id)
       diagnosis <- DeclareDesignZero::diagnose_design(design, sims = as.integer(sims))
       summary <- tryCatch(
@@ -535,14 +787,15 @@ bake_previews <- function(designs = NULL, sims = 100) {
         ),
         path
       )
-      paths <<- c(paths, path)
-      NULL
-    }, error = function(e) conditionMessage(e))
+      path
+    }, error = function(e) e)
 
-    if (!is.null(err)) {
+    if (inherits(result, "error")) {
       fail_ids <- c(fail_ids, id)
-      fail_errs <- c(fail_errs, err)
-      message("  FAILED: ", err)
+      fail_errs <- c(fail_errs, conditionMessage(result))
+      message("  FAILED: ", conditionMessage(result))
+    } else {
+      paths <- c(paths, result)
     }
   }
 
@@ -560,20 +813,60 @@ bake_previews <- function(designs = NULL, sims = 100) {
 
 #' Write index artifact under inst/library_index
 #' @noRd
-write_index_artifact <- function(index = make_index()) {
+write_index_artifact <- function(index = make_index(use_cache = FALSE)) {
   paths_info <- package_write_paths()
   out_dir <- paths_info$index
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   path <- file.path(out_dir, "designs_index.rds")
-  saveRDS(index, path)
-  utils::write.csv(index, file.path(out_dir, "designs_index.csv"), row.names = FALSE)
-  path
+  csv_path <- file.path(out_dir, "designs_index.csv")
+  files <- tryCatch(design_files(), error = function(e) character(0))
+  mtimes <- if (length(files)) {
+    stats::setNames(as.numeric(file.info(files)$mtime), basename(files))
+  } else {
+    numeric(0)
+  }
+  to_write <- index
+  if (nrow(to_write)) {
+    to_write$file_mtime <- as.numeric(unname(mtimes[as.character(to_write$file)]))
+  } else {
+    to_write$file_mtime <- numeric(0)
+  }
+  attr(to_write, "source_mtimes") <- mtimes
+
+  atomic_replace <- function(tmp, dest) {
+    if (file.exists(dest)) unlink(dest)
+    ok <- isTRUE(file.rename(tmp, dest))
+    if (!ok) {
+      file.copy(tmp, dest, overwrite = TRUE)
+      unlink(tmp)
+    }
+    dest
+  }
+
+  # CSV first: git artifact, Dropbox-safe, and what list_designs() reads.
+  csv_df <- to_write
+  csv_df$file_mtime <- NULL
+  attr(csv_df, "source_mtimes") <- NULL
+  csv_tmp <- paste0(csv_path, ".tmp")
+  utils::write.csv(csv_df, csv_tmp, row.names = FALSE)
+  atomic_replace(csv_tmp, csv_path)
+
+  rds_tmp <- paste0(path, ".tmp")
+  tryCatch({
+    saveRDS(to_write, rds_tmp)
+    atomic_replace(rds_tmp, path)
+  }, error = function(e) {
+    if (file.exists(rds_tmp)) unlink(rds_tmp)
+    warning("Could not write designs_index.rds: ", conditionMessage(e), call. = FALSE)
+  })
+  csv_path
 }
 
 #' Refresh the library (maintainer one-stop)
 #'
 #' Runs the contributor-facing checks and refreshes baked artifacts:
-#' index, audits, and diagnosis previews (`sims = 100` by default).
+#' index, audits (including a short diagnosis of every design), and
+#' diagnosis previews (`sims = 100` by default).
 #' Audit and preview failures are reported at the end; they do not abort
 #' the refresh.
 #'
@@ -590,14 +883,16 @@ refresh_library <- function(sims = 100, designs = NULL) {
   message("Checklist:")
   for (item in contributor_checklist()) message("  [ ] ", item)
 
-  index <- make_index()
+  index <- make_index(use_cache = FALSE)
   write_index_artifact(index)
   message("Index: ", nrow(index), " design(s)")
   if (nrow(index)) {
     message("  ", paste(index$id, collapse = ", "))
   }
 
-  audit <- audit_designs(designs = designs, sims = NULL, write_report = TRUE)
+  audit <- audit_designs(designs = designs, write_report = TRUE)
+  index <- overlay_audit_params(index, audit)
+  write_index_artifact(index)
   print(audit)
 
   ok_ids <- vapply(audit$results, function(r) {
@@ -733,7 +1028,7 @@ copy_dir_contents <- function(from, to, tries = 6L, sleep = 1) {
 #' when writing directly into `docs/`. This helper builds into a local temp
 #' directory, then copies the result into `docs/`.
 #'
-#' @param pkg Package root. Default: [find_package_root()] via
+#' @param pkg Package root. Default: `find_package_root()` via
 #'   `options(ResearchDesigns.root=...)` or the current working directory.
 #' @param ... Passed to [pkgdown::build_site()] (for example `devel = TRUE`).
 #' @return Invisibly, the path to `docs/`.

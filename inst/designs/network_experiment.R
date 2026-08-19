@@ -11,12 +11,13 @@ params:
   "controlled_direct_effect": "Controlled direct effect size"
   "controlled_indirect_effect": "Controlled indirect effect size"
   "total_effect": "Total effect size"
+  "adjacency": "Adjacency matrix; pass via make_design(..., adjacency = ...). Not edited in the browser."
+  "permutations": "Permutation matrix; pass via make_design(..., permutations = ...). Not edited in the browser."
+  "estimator_AS": "Function: Aronow-Samii network exposure estimator (R-only)"
 book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num13
-# runs and diagnoses, but the design's adjacency and permutation matrices are
-# discovered as editable parameters, so the browser would offer two controls
-# that cannot sensibly be typed into. Turn this on once
-# filter_modifiable_params() drops objects with a dim attribute.
-include_in_shiny: false
+# adjacency and permutations are package parameters (kind = data), not Shiny
+# controls. The browser edits the three effect sizes only.
+include_in_shiny: true
 functional: true
 ---
 

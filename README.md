@@ -2,7 +2,7 @@
 
 A prototype for a library of declared designs using DeclareDesignZero.
 
-**Versioning:** start at 0.1.0 and bump slowly.
+**Versioning:** start at 0.1.0 and bump slowly. Current: 0.1.1.
 
 ## Idea
 
@@ -17,6 +17,7 @@ A prototype for a library of declared designs using DeclareDesignZero.
 list_designs()
 make_design("two_arm_trial")
 make_design("two_arm_trial", b = 0.5)
+two_arm_designer(N = 40, ate = 0.2)  # DesignLibrary name
 make_design("2.1", b = 0.5)          # book alias
 get_args("two_arm_trial")
 get_code("two_arm_trial")             # simple make_design() + full source

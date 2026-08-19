@@ -7,7 +7,7 @@
 build_docs(pkg = NULL, ...)
 }
 \arguments{
-\item{pkg}{Package root. Default: \code{\link[=find_package_root]{find_package_root()}} via
+\item{pkg}{Package root. Default: \code{find_package_root()} via
 \code{options(ResearchDesigns.root=...)} or the current working directory.}
 
 \item{...}{Passed to \code{\link[pkgdown:build_site]{pkgdown::build_site()}} (for example \code{devel = TRUE}).}

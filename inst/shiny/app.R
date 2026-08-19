@@ -163,6 +163,8 @@ details.rd-details[open] > summary { margin-bottom: 0.65rem; }
   padding: 0.45rem 0.7rem; font-size: 0.86rem; color: var(--dd-body);
   margin-bottom: 0.45rem;
 }
+.rd-help-box ul { margin: 0.15rem 0 0.15rem 1.15rem; padding: 0; }
+.rd-help-box li + li { margin-top: 0.2rem; }
 .rd-help-box code { background: #fff; padding: 0.05rem 0.3rem; border-radius: 4px; color: var(--dd-navy); }
 .rd-error { color: #ff0039; font-size: 0.9rem; margin: 0.35rem 0; }
 .rd-design-link {
@@ -651,72 +653,13 @@ server <- function(input, output, session) {
     if (all(parses_ok)) paste0("c(", paste(parts, collapse = ", "), ")") else str
   }
 
-  format_arg_default <- function(value_str) {
-    vs <- trimws(value_str %||% "")
-    if (!nzchar(vs)) return("")
-    # Prefer a scalar display when default was already a vector/c(...)
-    parsed <- tryCatch(eval(parse(text = vs), envir = baseenv()), error = function(e) NULL)
-    if (is.numeric(parsed) && length(parsed) >= 1L) {
-      v <- parsed[[1L]]
-      if (abs(v - round(v)) < 1e-6) return(as.character(as.integer(round(v))))
-      return(as.character(round(v, 4)))
-    }
-    if (is.atomic(parsed) && length(parsed) >= 1L) return(as.character(parsed[[1L]]))
-    vs
+  format_arg_default <- function(args_row) {
+    kind <- if ("kind" %in% names(args_row)) args_row$kind[[1]] else "scalar"
+    val <- if ("default" %in% names(args_row)) args_row$default[[1]] else NULL
+    ResearchDesigns:::format_shiny_param_default(
+      val, kind, args_row$value_str[[1]] %||% ""
+    )
   }
-
-  tip_title <- function(tip) {
-    tip <- trimws(tip %||% "")
-    ex <- "Range example: 0, 10, 20"
-    if (nzchar(tip) && !is.na(tip)) paste0(tip, "\n", ex) else ex
-  }
-
-  collect_mod_dots <- function(id) {
-    args <- ResearchDesigns::get_args(id)
-    if (!nrow(args)) {
-      return(list(dots = list(), exprs = list(), lengths = integer(0), range_params = character(0)))
-    }
-    dots <- list()
-    exprs <- list()
-    lengths <- integer(0)
-    for (i in seq_len(nrow(args))) {
-      nm <- args$name[[i]]
-      raw <- trimws(input[[paste0("mod_val_", nm)]] %||% "")
-      if (!nzchar(raw)) next
-      def <- format_arg_default(args$value_str[[i]])
-      # Skip unchanged scalars to keep code preview tidy
-      if (identical(raw, def) || identical(raw, trimws(args$value_str[[i]] %||% ""))) next
-      expr <- normalize_value_expression(raw)
-      val <- tryCatch(
-        eval(parse(text = expr), envir = baseenv()),
-        error = function(e) e
-      )
-      if (inherits(val, "error")) {
-        return(list(error = paste0("Could not parse ", nm, ": ", conditionMessage(val))))
-      }
-      dots[[nm]] <- val
-      exprs[[nm]] <- if (length(val) > 1L && !grepl("^c\\s*\\(", raw) && !grepl("^seq\\s*\\(", raw)) {
-        paste0("c(", paste(as.character(val), collapse = ", "), ")")
-      } else {
-        expr
-      }
-      lengths[[nm]] <- length(val)
-    }
-    range_params <- names(lengths)[lengths > 1L]
-    list(dots = dots, exprs = exprs, lengths = lengths, range_params = range_params)
-  }
-
-  is_template_category <- function(cat) {
-    tolower(trimws(as.character(cat %||% ""))) %in% c("template", "templates")
-  }
-
-  cats <- sort(unique(as.character(idx_all$category %||% "Other")))
-  cats <- c(cats[is_template_category(cats)], cats[!is_template_category(cats)])
-  updateSelectInput(
-    session, "lib_category",
-    choices = c("All categories" = "all", stats::setNames(cats, cats)),
-    selected = "all"
-  )
 
   html_escape <- function(x) {
     x <- as.character(x %||% "")
@@ -727,6 +670,74 @@ server <- function(input, output, session) {
     x <- gsub("\"", "&quot;", x, fixed = TRUE)
     x
   }
+
+  tip_title <- function(tip, kind = "scalar") {
+    tip <- trimws(tip %||% "")
+    ex <- if (identical(kind, "vector")) {
+      "Vector: 0.1, 0.2, 0.3. Sweep: 0,0,0,1; 0,0.5,0.5,1"
+    } else {
+      "Range example: 0, 10, 20"
+    }
+    if (nzchar(tip) && !is.na(tip)) paste0(tip, "\n", ex) else ex
+  }
+
+  redesign_kind_help <- function(id) {
+    HTML(ResearchDesigns:::redesign_kind_help(id))
+  }
+
+  collect_mod_dots <- function(id) {
+    args <- ResearchDesigns::get_args(id)
+    if (!nrow(args)) {
+      return(list(dots = list(), exprs = list(), lengths = integer(0), range_params = character(0)))
+    }
+    if ("shiny" %in% names(args)) {
+      args <- args[isTRUE(args$shiny) | args$shiny %in% TRUE, , drop = FALSE]
+    }
+    dots <- list()
+    exprs <- list()
+    lengths <- integer(0)
+    for (i in seq_len(nrow(args))) {
+      nm <- args$name[[i]]
+      kind <- if ("kind" %in% names(args)) args$kind[[i]] else "scalar"
+      raw <- trimws(input[[paste0("mod_val_", nm)]] %||% "")
+      if (!nzchar(raw)) next
+      def <- format_arg_default(args[i, , drop = FALSE])
+      parsed <- ResearchDesigns:::parse_shiny_param_raw(raw, kind, def)
+      if (isTRUE(parsed$skip)) next
+      if (!is.null(parsed$error)) {
+        return(list(error = paste0("Could not parse ", nm, ": ", parsed$error)))
+      }
+      dots[[nm]] <- parsed$value
+      if (isTRUE(parsed$sweep) && identical(kind, "vector")) {
+        exprs[[nm]] <- paste0("list(", paste(vapply(parsed$value, function(v) {
+          paste0("c(", paste(as.character(v), collapse = ", "), ")")
+        }, character(1)), collapse = ", "), ")")
+        lengths[[nm]] <- length(parsed$value)
+      } else if (isTRUE(parsed$sweep)) {
+        exprs[[nm]] <- paste0("c(", paste(as.character(parsed$value), collapse = ", "), ")")
+        lengths[[nm]] <- length(parsed$value)
+      } else {
+        val <- parsed$value
+        exprs[[nm]] <- if (length(val) > 1L) {
+          paste0("c(", paste(as.character(val), collapse = ", "), ")")
+        } else {
+          raw
+        }
+        lengths[[nm]] <- if (identical(kind, "vector")) 1L else length(val)
+      }
+    }
+    range_params <- names(lengths)[lengths > 1L]
+    list(dots = dots, exprs = exprs, lengths = lengths, range_params = range_params)
+  }
+
+  # Category choices follow first appearance in list_designs() (starter
+  # templates, other templates, RDSS, other). Do not alpha-sort.
+  cats <- unique(as.character(idx_all$category %||% "Other"))
+  updateSelectInput(
+    session, "lib_category",
+    choices = c("All categories" = "all", stats::setNames(cats, cats)),
+    selected = "all"
+  )
 
   filtered_idx <- reactive({
     df <- as.data.frame(idx_all)
@@ -745,16 +756,8 @@ server <- function(input, output, session) {
       ))
       df <- df[grepl(tolower(q), hay, fixed = TRUE), , drop = FALSE]
     }
-    # Template category first, then other categories, then label
-    if (nrow(df)) {
-      o <- order(
-        !is_template_category(df$category),
-        as.character(df$category),
-        as.character(df$label)
-      )
-      df <- df[o, , drop = FALSE]
-      rownames(df) <- NULL
-    }
+    # Keep list_designs() row order (starter sequence, then other groups).
+    rownames(df) <- NULL
     df
   })
 
@@ -787,13 +790,12 @@ server <- function(input, output, session) {
         permalink_svg
       )
     }, character(1))
-    alias <- as.character(df$alias)
-    alias[is.na(alias)] <- ""
+    params_disp <- as.character(df$params)
+    params_disp[is.na(df$params)] <- ""
     data.frame(
       label = if (has_dt) label_html else labels,
-      alias = alias,
       category = as.character(df$category %||% ""),
-      params = as.character(df$params %||% ""),
+      params = params_disp,
       packages = as.character(df$packages %||% ""),
       stringsAsFactors = FALSE,
       .id_key = ids,
@@ -871,7 +873,7 @@ server <- function(input, output, session) {
   if (has_dt) {
     output$library_table <- DT::renderDT({
       disp <- library_display()
-      show <- disp[, c("label", "alias", "category", "params", "packages"), drop = FALSE]
+      show <- disp[, c("label", "category", "params", "packages"), drop = FALSE]
       DT::datatable(
         show,
         selection = "single",
@@ -885,15 +887,14 @@ server <- function(input, output, session) {
           scrollX = TRUE,
           # Search/filter is handled by lib_search / lib_category above
           searching = FALSE,
-          order = list(),  # keep template-first row order from filtered_idx()
+          order = list(),  # keep list_designs() row order from filtered_idx()
           ordering = TRUE,
-          # Must match the 5 columns in `show` (id column was removed)
+          # Must match the 4 columns in `show` (id and alias columns are hidden)
           columnDefs = list(
-            list(width = "34%", targets = 0),  # label (+ permalink)
-            list(width = "10%", targets = 1),  # alias
-            list(width = "12%", targets = 2),  # category
-            list(width = "24%", targets = 3),  # params
-            list(width = "20%", targets = 4)   # packages
+            list(width = "40%", targets = 0),  # label (+ permalink)
+            list(width = "14%", targets = 1),  # category
+            list(width = "26%", targets = 2),  # params
+            list(width = "20%", targets = 3)   # packages
           ),
           # Hide Previous/Next when everything fits on one page
           drawCallback = DT::JS(
@@ -909,7 +910,7 @@ server <- function(input, output, session) {
     })
   } else {
     output$library_table_basic <- renderTable({
-      library_display()[, c("label", "alias", "category", "params", "packages"), drop = FALSE]
+      library_display()[, c("label", "category", "params", "packages"), drop = FALSE]
     })
   }
 
@@ -984,10 +985,7 @@ server <- function(input, output, session) {
         class = "rd-card",
         div(
           class = "rd-help-box",
-          HTML(paste0(
-            "Edit parameters below. Use a <strong>comma-separated range</strong> ",
-            "like <code>0, 10, 20</code> on at most <strong>two</strong> parameters."
-          ))
+          redesign_kind_help(id)
         ),
         uiOutput("mod_param_grid"),
         fluidRow(
@@ -1032,7 +1030,14 @@ server <- function(input, output, session) {
     id <- selected_id()
     req(!is.na(id), nzchar(id))
     args <- ResearchDesigns::get_args(id)
-    data.frame(name = args$name, default = args$value_str, tip = args$tip, stringsAsFactors = FALSE)
+    show <- data.frame(
+      name = args$name,
+      default = args$value_str,
+      kind = if ("kind" %in% names(args)) args$kind else "",
+      tip = args$tip,
+      stringsAsFactors = FALSE
+    )
+    show
   })
 
   observeEvent(input$run_once, {
@@ -1343,23 +1348,54 @@ server <- function(input, output, session) {
     id <- selected_id()
     if (is.na(id) || !nzchar(id)) return(NULL)
     args <- ResearchDesigns::get_args(id)
-    if (!nrow(args)) return(helpText("No modifiable parameters."))
-    rows <- lapply(seq_len(nrow(args)), function(i) {
-      nm <- args$name[[i]]
-      tip <- tip_title(args$tip[[i]])
+    data_args <- if ("kind" %in% names(args) && nrow(args)) {
+      args[args$kind %in% c("data", "function"), , drop = FALSE]
+    } else {
+      args[0, , drop = FALSE]
+    }
+    shiny_args <- if ("shiny" %in% names(args) && nrow(args)) {
+      args[isTRUE(args$shiny) | args$shiny %in% TRUE, , drop = FALSE]
+    } else {
+      args
+    }
+    note <- NULL
+    if (nrow(data_args)) {
+      note <- p(
+        class = "rd-muted",
+        "Also takes in R: ",
+        tags$code(
+          paste0(
+            "make_design(\"", id, "\", ",
+            paste(sprintf("%s = ...", data_args$name), collapse = ", "),
+            ")"
+          )
+        )
+      )
+    }
+    if (!nrow(shiny_args)) {
+      return(tagList(note, helpText("No modifiable parameters in the browser.")))
+    }
+    rows <- lapply(seq_len(nrow(shiny_args)), function(i) {
+      nm <- shiny_args$name[[i]]
+      kind <- if ("kind" %in% names(shiny_args)) shiny_args$kind[[i]] else "scalar"
+      tip <- tip_title(shiny_args$tip[[i]], kind)
       tagList(
         tags$div(class = "rd-param-name", nm),
         tags$span(class = "rd-tip", title = tip, "i"),
         textInput(
           inputId = paste0("mod_val_", nm),
           label = NULL,
-          value = format_arg_default(args$value_str[[i]]),
+          value = format_arg_default(shiny_args[i, , drop = FALSE]),
           width = "100%",
-          placeholder = "e.g. 100 or 0, 10, 20"
+          placeholder = if (identical(kind, "vector")) {
+            "e.g. 0.1, 0.2, 0.3;"
+          } else {
+            "e.g. 100 or 0, 10, 20"
+          }
         )
       )
     })
-    div(class = "rd-param-grid", rows)
+    tagList(note, div(class = "rd-param-grid", rows))
   })
 
   current_mod_state <- reactive({
@@ -1410,11 +1446,14 @@ server <- function(input, output, session) {
     id <- selected_id()
     req(!is.na(id))
     args <- ResearchDesigns::get_args(id)
+    if ("shiny" %in% names(args)) {
+      args <- args[isTRUE(args$shiny) | args$shiny %in% TRUE, , drop = FALSE]
+    }
     for (i in seq_len(nrow(args))) {
       updateTextInput(
         session,
         paste0("mod_val_", args$name[[i]]),
-        value = format_arg_default(args$value_str[[i]])
+        value = format_arg_default(args[i, , drop = FALSE])
       )
     }
     mod_diag(NULL)

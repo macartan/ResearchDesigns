@@ -16,7 +16,8 @@ default_meta <- function(id) {
     include_in_shiny = TRUE,
     functional = TRUE,
     book_link = NA_character_,
-    params = list()
+    params = list(),
+    coupled = list()
   )
 }
 
@@ -123,10 +124,187 @@ merge_meta <- function(defaults, parsed, id_guess) {
   if (!is.null(parsed$params) && is.list(parsed$params)) {
     out$params <- normalize_params_map(parsed$params)
   }
+  if (!is.null(parsed$coupled)) {
+    out$coupled <- normalize_coupled(parsed$coupled)
+  }
   if (is.null(out$label) || !nzchar(as.character(out$label)[[1]])) {
     out$label <- humanize_id(out$id %||% id_guess)
   }
   out
+}
+
+#' Coerce YAML `coupled:` to a named list of character vectors
+#'
+#' ```yaml
+#' coupled:
+#'   m_arms: [outcome_means, outcome_sds, conditions]
+#' ```
+#' means changing `m_arms` requires those dependents to have compatible
+#' length (typically `length == m_arms`).
+#' @noRd
+normalize_coupled <- function(x) {
+  if (is.null(x) || !length(x)) return(list())
+  if (!is.list(x)) return(list())
+  nms <- names(x)
+  if (is.null(nms)) return(list())
+  out <- list()
+  for (i in seq_along(x)) {
+    nm <- nms[[i]]
+    if (is.null(nm) || !nzchar(nm) || is.na(nm)) next
+    deps <- as_chr(x[[i]])
+    deps <- trimws(deps)
+    deps <- deps[!is.na(deps) & nzchar(deps)]
+    if (length(deps)) out[[nm]] <- unname(deps)
+  }
+  out
+}
+
+#' English list: a; a and b; a, b, and c
+#' @noRd
+oxford_and <- function(x) {
+  x <- as.character(x %||% character(0))
+  x <- x[!is.na(x) & nzchar(x)]
+  n <- length(x)
+  if (n == 0L) return("")
+  if (n == 1L) return(x)
+  if (n == 2L) return(paste(x, collapse = " and "))
+  paste0(paste(x[-n], collapse = ", "), ", and ", x[[n]])
+}
+
+#' User-facing note for one coupled driver
+#' @noRd
+format_coupled_note <- function(driver, dependents) {
+  sprintf(
+    "Changing %s requires matching-length %s.",
+    as.character(driver)[[1]],
+    oxford_and(dependents)
+  )
+}
+
+#' Notes for every coupled driver on a metadata list
+#' @noRd
+coupled_notes <- function(meta) {
+  coupled <- meta$coupled %||% list()
+  if (!length(coupled)) return(character(0))
+  nms <- names(coupled)
+  if (is.null(nms)) return(character(0))
+  nms <- nms[!is.na(nms) & nzchar(nms)]
+  if (!length(nms)) return(character(0))
+  vapply(nms, function(drv) {
+    format_coupled_note(drv, coupled[[drv]])
+  }, character(1), USE.NAMES = FALSE)
+}
+
+#' Coupled notes for a design id, parsed meta, or `design_info()` list
+#' @noRd
+coupled_help_text <- function(design) {
+  if (is.list(design) && !is.null(design$coupled)) {
+    return(coupled_notes(design))
+  }
+  coupled_notes(resolve_design(design)$meta)
+}
+
+#' Unwrap `prepare_redesign_dots()` list wrapping
+#' @noRd
+unwrap_redesign_value <- function(val) {
+  if (is.list(val) && !is.data.frame(val) && !is.function(val) && length(val) == 1L) {
+    return(val[[1]])
+  }
+  val
+}
+
+#' Expected length of coupled dependents given a driver value
+#'
+#' A length-1 numeric driver (e.g. `m_arms = 4`) is the expected length.
+#' @noRd
+coupled_expected_length <- function(driver_val) {
+  val <- unwrap_redesign_value(driver_val)
+  if (is.numeric(val) && length(val) == 1L && is.finite(val[[1]])) {
+    return(as.integer(val[[1]]))
+  }
+  NA_integer_
+}
+
+#' Length of a coupled dependent value
+#' @noRd
+coupled_dep_length <- function(val) {
+  val <- unwrap_redesign_value(val)
+  if (is.list(val) && !is.data.frame(val) && !is.function(val)) {
+    lens <- vapply(val, function(x) {
+      if (is.atomic(x)) length(x) else NA_integer_
+    }, integer(1))
+    if (anyNA(lens)) return(NA_integer_)
+    u <- unique(lens)
+    if (length(u) == 1L) return(u)
+    return(NA_integer_)
+  }
+  if (is.atomic(val)) return(length(val))
+  NA_integer_
+}
+
+#' Named list of current parameter values from a design object
+#' @noRd
+param_value_map <- function(design, code = NULL) {
+  if (is.null(design) || !inherits(design, "design")) return(list())
+  params <- tryCatch(
+    discover_design_params(design, code = code),
+    error = function(e) NULL
+  )
+  if (is.null(params) || !nrow(params)) return(list())
+  stats::setNames(
+    lapply(seq_len(nrow(params)), function(i) params$value[[i]]),
+    params$name
+  )
+}
+
+#' Coupled notes that currently mismatch (dots and/or design values)
+#' @noRd
+coupled_issues <- function(meta, dots = list(), design = NULL, code = NULL) {
+  coupled <- meta$coupled %||% list()
+  if (!length(coupled)) return(character(0))
+  current <- param_value_map(design, code = code)
+  notes <- character(0)
+  for (drv in names(coupled)) {
+    if (is.null(drv) || !nzchar(drv)) next
+    deps <- coupled[[drv]]
+    drv_val <- if (drv %in% names(dots)) {
+      unwrap_redesign_value(dots[[drv]])
+    } else {
+      current[[drv]]
+    }
+    if (is.null(drv_val)) next
+    n_expect <- coupled_expected_length(drv_val)
+    if (is.na(n_expect)) {
+      if (drv %in% names(dots)) {
+        notes <- c(notes, format_coupled_note(drv, deps))
+      }
+      next
+    }
+    ok <- TRUE
+    for (dep in deps) {
+      dep_val <- if (dep %in% names(dots)) {
+        unwrap_redesign_value(dots[[dep]])
+      } else {
+        current[[dep]]
+      }
+      if (is.null(dep_val)) next
+      n_dep <- coupled_dep_length(dep_val)
+      if (is.na(n_dep) || n_dep != n_expect) {
+        ok <- FALSE
+        break
+      }
+    }
+    if (!ok) notes <- c(notes, format_coupled_note(drv, deps))
+  }
+  unique(notes)
+}
+
+#' `message()` coupled-parameter notes; return the notes shown
+#' @noRd
+message_coupled_if_needed <- function(meta, dots = list(), design = NULL, code = NULL) {
+  notes <- coupled_issues(meta, dots = dots, design = design, code = code)
+  for (note in notes) message(note)
+  invisible(notes)
 }
 
 #' Load design YAML with safer booleans for param keys like N/n

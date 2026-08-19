@@ -10,6 +10,7 @@ packages: [MatchIt]
 params:
   "N": "Number of units (sample or population size)"
   "ate": "Average treatment effect of D on Y"
+  "exact_matching": "Function: exact-match treated to controls on covariate values (R-only)"
 book_link: https://book.declaredesign.org/library/observational-causal.html#def-ch16num2
 include_in_shiny: true
 ---

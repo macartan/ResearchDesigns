@@ -11,6 +11,8 @@ params:
   "N": "Number of units (sample or population size)"
   "bandwidth": "RDD estimation bandwidth"
   "cutoff": "Regression discontinuity cutoff"
+  "control": "Function: untreated potential outcome Y(0) of the running variable (R-only)"
+  "treatment": "Function: treated potential outcome Y(1) of the running variable (R-only)"
 book_link: https://book.declaredesign.org/library/observational-causal.html#def-ch16num6
 include_in_shiny: true
 ---

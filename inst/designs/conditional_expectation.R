@@ -8,7 +8,9 @@ description: >
 packages: [purrr, tibble, dplyr, tidyr, stringr]
 params:
   "N": "Number of units (sample or population size)"
-  "x_range": "Support / range of the running covariate X"
+  "x_range": "Grid of X values at which the CEF and polynomial fits are evaluated"
+  "polynomial_degrees": "Polynomial degrees for CEF approximation"
+  "dip": "Conditional expectation function of the covariate X"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num4
 include_in_shiny: false
 ---
@@ -17,7 +19,6 @@ dip <- function(x) (x <= 1) * x + (x > 1) * (x - 2) ^ 2 + 0.2
 
 x_range <- seq(from = 0, to = 3, length.out = 50)
 
-# Used inside the estimator handler (not always redesignable via the design finder)
 polynomial_degrees <- 1:6
 
 N <- 100

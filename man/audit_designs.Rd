@@ -4,17 +4,13 @@
 \alias{audit_designs}
 \title{Audit one or more designs}
 \usage{
-audit_designs(
-  designs = NULL,
-  sims = NULL,
-  write_report = TRUE,
-  report_dir = NULL
-)
+audit_designs(designs = NULL, sims = 2, write_report = TRUE, report_dir = NULL)
 }
 \arguments{
 \item{designs}{Character vector of ids/aliases, or \code{NULL} for all.}
 
-\item{sims}{If not \code{NULL}, run a short \code{diagnose_design()} with this many sims.}
+\item{sims}{Number of simulations for a short \code{diagnose_design()} (default
+2). If \code{NULL}, skip the run check (load and params only).}
 
 \item{write_report}{If \code{TRUE} (default), write CSV + markdown under \verb{tools/}.}
 
@@ -30,6 +26,11 @@ records pre-design objects that are used by the design but missing from the
 redesignable parameter list (see \code{\link[=param_coverage_report]{param_coverage_report()}}).
 }
 \details{
+By default each design is diagnosed with a short \code{diagnose_design()} run
+(\code{sims = 2}). A design that loads but does not run is a failure. Pass
+\code{sims = NULL} only for a load-and-params scan while editing a single file;
+\code{refresh_library()} and the test suite always run the design.
+
 Failures are collected per design and (by default) written to
 \code{tools/audit_report.csv}, \code{tools/audit_report.md}, and
 \code{tools/audit_report.txt} (FAIL/SKIP first, then OK) under the package root

@@ -9,6 +9,10 @@ description: >
 params:
   "cluster_prob": "Cluster sampling probability"
   "state_mean": "State-level mean of the outcome"
+  "ICC": "Intracluster correlation of the outcome"
+  "locality_shock": "Locality-level shock"
+  "individual_shock": "Individual-level shock"
+  "budget_function": "Maps cluster sampling probability to an individual sampling probability"
 book_link: https://book.declaredesign.org/library/observational-descriptive.html#def-ch15num3
 include_in_shiny: true
 ---

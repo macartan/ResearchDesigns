@@ -16,7 +16,7 @@ param_coverage_report(
 \item{atomic_only}{If \code{TRUE}, only report atomic gaps (likely should be
 redesignable). If \code{FALSE}, also report other non-step gaps (e.g. data frames).}
 
-\item{include_steps}{If \code{TRUE}, also report design pieces and helper functions.}
+\item{include_steps}{If \code{TRUE}, also report design pieces.}
 }
 \value{
 A data frame (class \code{research_designs_param_coverage}) of gaps.

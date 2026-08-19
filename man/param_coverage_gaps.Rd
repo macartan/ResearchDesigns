@@ -7,9 +7,9 @@
 param_coverage_gaps(design, include_steps = FALSE)
 }
 \arguments{
-\item{design}{Design id/alias, or a parsed design list from \code{\link[=parse_design_file]{parse_design_file()}}.}
+\item{design}{Design id/alias, or a parsed design list from \code{parse_design_file()}.}
 
-\item{include_steps}{If \code{TRUE}, also report design pieces and functions.
+\item{include_steps}{If \code{TRUE}, also report design pieces.
 Default \code{FALSE} (audit-friendly).}
 }
 \value{
@@ -17,12 +17,13 @@ Data frame of gaps (possibly empty) with columns
 \code{id}, \code{name}, \code{type}, \code{atomic}, \code{used_in_code}, \code{in_finder}, \code{in_params}.
 }
 \description{
-Runs the design, reads \code{\link[=discover_design_params]{discover_design_params()}}, and compares to top-level
+Runs the design, reads \code{discover_design_params()}, and compares to top-level
 assignments before \verb{design <-}. Flags names that are used in the design body
 (or seen by DeclareDesignZero's object finder) but not in the redesignable
 parameter list.
 }
 \details{
-Design steps (MIDA pieces built with \verb{declare_*}, etc.) and helper functions
-are not parameters and are omitted unless \code{include_steps = TRUE}.
+Design steps (MIDA pieces built with \verb{declare_*}, etc.) are not parameters
+and are omitted unless \code{include_steps = TRUE}. Functions assigned before
+\verb{design <-} are R-only parameters.
 }

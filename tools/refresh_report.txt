@@ -1,0 +1,13 @@
+ResearchDesigns refresh_library() summary
+Package root: C:/WZB Dropbox/Macartan Humphreys/5_github/ResearchDesigns
+Index designs: 67
+Audit: 67 ok, 0 parked, 0 failed
+Previews written: 0 of 48 targets
+
+No failures.
+
+Audit report:
+  C:/WZB Dropbox/Macartan Humphreys/5_github/ResearchDesigns/tools/audit_report.csv
+  C:/WZB Dropbox/Macartan Humphreys/5_github/ResearchDesigns/tools/audit_report.md
+  C:/WZB Dropbox/Macartan Humphreys/5_github/ResearchDesigns/tools/audit_report.txt
+

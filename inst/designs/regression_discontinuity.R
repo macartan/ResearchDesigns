@@ -10,6 +10,8 @@ packages: [rdss, rdrobust]
 params:
   "N": "Number of units (sample or population size)"
   "cutoff": "Regression discontinuity cutoff"
+  "control": "Function: untreated potential outcome Y(0) of the running variable (R-only)"
+  "treatment": "Function: treated potential outcome Y(1) of the running variable (R-only)"
 book_link: https://book.declaredesign.org/library/observational-causal.html#def-ch16num5
 include_in_shiny: false
 ---

@@ -51,6 +51,9 @@ normalize_design_key <- function(design) {
 }
 
 #' Source a parsed design file and return the design object
+#'
+#' Evaluates the file at its written defaults. Parameter changes go through
+#' `redesign()` in [make_design()], not by skipping assignments here.
 #' @noRd
 eval_design <- function(parsed) {
   pkgs <- unique(c(core_packages(), parsed$meta$packages %||% character(0)))
@@ -88,20 +91,76 @@ eval_design <- function(parsed) {
   design
 }
 
+#' Design ids that match exported DesignLibrary designer names
+#' @noRd
+designlibrary_core_ids <- function() {
+  c(
+    "two_arm",
+    "two_arm_attrition",
+    "pretest_posttest",
+    "randomized_response",
+    "mediation_analysis",
+    "multiarm_trial",
+    "two_by_two",
+    "block_cluster_two_arm"
+  )
+}
+
+#' Pedagogical starter sequence for list_designs() print and row order.
+#' Ids that are not yet in the library are skipped by grouping.
+#' @noRd
+starter_design_ids <- function() {
+  c(
+    "two_arm_trial",          # Simple two-arm trial
+    "two_arm",                # Flexible two-arm trial (library)
+    "multiarm_trial",         # Multi-arm trial
+    "two_arm_with_blocks",    # Two-arm trial with blocks
+    "block_cluster_two_arm",  # Two arm trial with blocks and clusters
+    "two_arm_attrition",      # Two-arm trial with attrition
+    "two_by_two",             # 2x2 factorial (library)
+    "factorial_2x2x2",        # 2x2x2 factorial
+    "pretest_posttest",       # Pretest-posttest design
+    "randomized_response",    # Randomized response
+    "mediation_analysis"      # Mediation analysis
+  )
+}
+
+#' Group index: 1 starter sequence, 2 other templates, 3 RDSS, 4 other.
+#' Starter ids stay in group 1 even if YAML category is rdss.
+#' @noRd
+design_list_group <- function(id, category) {
+  id <- as.character(id)
+  catg <- tolower(trimws(as.character(category %||% "")))
+  starter <- id %in% starter_design_ids()
+  template <- catg %in% c("template", "templates")
+  rdss <- catg == "rdss"
+  ifelse(starter, 1L, ifelse(template, 2L, ifelse(rdss, 3L, 4L)))
+}
+
 #' List designs in the library
 #'
-#' Returns a data frame of design metadata. Printing shows a compact summary
-#' (`id`, `alias`, modifiable parameters). Use [design_info()], [get_args()],
-#' or `as.data.frame()` / `print(as.data.frame(x))` for the full table.
+#' Returns a data frame of design metadata. Printing is a grouped list of
+#' `id (label)` lines, starting with a short getting-started sequence, then
+#' other templates, RDSS, and remaining designs. Default listing is
+#' metadata-only (baked library index plus a live-file overlay). The `params`
+#' column is a comma-separated name string from that index (YAML `params:`
+#' keys plus pre-design assignment names); designs are not evaluated. Use
+#' [design_info()], [get_args()], or
+#' `as.data.frame(list_designs(discover_params = TRUE))` for redesignable
+#' parameters from a loaded design. Row order matches print order.
 #'
 #' @param shiny_only If `TRUE`, only designs with `include_in_shiny: true`
 #'   (the default when the field is omitted).
-#' @param discover_params If `TRUE` (default), load each design once to list
-#'   redesignable parameters. Set `FALSE` for a metadata-only scan.
+#' @param discover_params If `TRUE`, load each design once to list
+#'   redesignable parameters (overrides index names). Default `FALSE` uses
+#'   baked index names and does not evaluate designs.
+#' @param list_all If `FALSE` (default), printing shows the full getting-started
+#'   sequence and up to 10 designs in each remaining group. If `TRUE`, printing
+#'   lists every design.
 #' @return A data frame with class `research_designs_list`.
 #' @export
-list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
-  files <- design_files()
+list_designs <- function(shiny_only = FALSE, discover_params = FALSE, list_all = FALSE) {
+  idx <- make_index()
   empty <- data.frame(
     id = character(0),
     alias = character(0),
@@ -115,105 +174,123 @@ list_designs <- function(shiny_only = FALSE, discover_params = TRUE) {
     file = character(0),
     stringsAsFactors = FALSE
   )
-  if (!length(files)) {
-    return(structure(empty, class = c("research_designs_list", "data.frame")))
+  if (!nrow(idx)) {
+    return(structure(
+      empty,
+      class = c("research_designs_list", "data.frame"),
+      list_all = isTRUE(list_all)
+    ))
   }
 
-  rows <- lapply(files, function(path) {
-    parsed <- parse_design_file(path)
-    m <- parsed$meta
-    alias <- if (is.null(m$alias) || (length(m$alias) == 1L && is.na(m$alias))) {
-      NA_character_
-    } else {
-      as.character(m$alias)[[1]]
-    }
-
-    params <- NA_character_
-    if (isTRUE(discover_params) && isTRUE(m$functional)) {
-      params <- tryCatch({
+  params <- if ("params" %in% names(idx)) {
+    as.character(idx$params)
+  } else {
+    rep("", nrow(idx))
+  }
+  params[is.na(params)] <- ""
+  if (isTRUE(discover_params)) {
+    dir <- designs_dir()
+    for (i in seq_len(nrow(idx))) {
+      if (!isTRUE(idx$functional[[i]])) next
+      params[[i]] <- tryCatch({
+        parsed <- parse_design_file(file.path(dir, idx$file[[i]]))
         design <- eval_design(parsed)
         pnames <- discover_design_params(design, code = parsed$code)$name
         if (!length(pnames)) "" else paste(pnames, collapse = ", ")
       }, error = function(e) NA_character_)
     }
+  }
 
-    pkgs <- m$packages %||% character(0)
-    pkgs <- pkgs[nzchar(as.character(pkgs))]
-
-    data.frame(
-      id = m$id,
-      alias = alias,
-      params = params,
-      packages = if (!length(pkgs)) "" else paste(pkgs, collapse = ", "),
-      label = as.character(m$label)[[1]],
-      category = as.character(m$category %||% "Other")[[1]],
-      keywords = paste(m$keywords %||% character(0), collapse = ", "),
-      include_in_shiny = isTRUE(m$include_in_shiny),
-      functional = isTRUE(m$functional),
-      file = basename(path),
-      stringsAsFactors = FALSE
-    )
-  })
-  out <- do.call(rbind, rows)
+  out <- data.frame(
+    id = idx$id,
+    alias = idx$alias,
+    params = params,
+    packages = idx$packages,
+    label = idx$label,
+    category = idx$category,
+    keywords = idx$keywords,
+    include_in_shiny = idx$include_in_shiny,
+    functional = idx$functional,
+    file = idx$file,
+    stringsAsFactors = FALSE
+  )
   if (isTRUE(shiny_only)) {
     out <- out[out$include_in_shiny, , drop = FALSE]
     rownames(out) <- NULL
   }
   if (nrow(out)) {
-    # Template category first, then other categories / label
-    is_template <- tolower(trimws(as.character(out$category %||% ""))) %in%
-      c("template", "templates")
-    o <- order(!is_template, as.character(out$category), as.character(out$label), as.character(out$id))
-    out <- out[o, , drop = FALSE]
-    rownames(out) <- NULL
+    out <- arrange_design_list(out)
   }
-  structure(out, class = c("research_designs_list", "data.frame"))
+  structure(
+    out,
+    class = c("research_designs_list", "data.frame"),
+    list_all = isTRUE(list_all)
+  )
+}
+
+#' Pedagogical row order for list_designs()
+#' @noRd
+arrange_design_list <- function(out) {
+  grp <- design_list_group(out$id, out$category)
+  starter <- starter_design_ids()
+  starter_rank <- match(out$id, starter)
+  starter_rank[is.na(starter_rank)] <- length(starter) + 1L
+  o <- order(grp, starter_rank, as.character(out$id))
+  out <- out[o, , drop = FALSE]
+  rownames(out) <- NULL
+  out
 }
 
 #' @export
-print.research_designs_list <- function(x, ..., n = 5L) {
+print.research_designs_list <- function(x, ..., list_all = NULL, n = 10L) {
   n_all <- nrow(x)
   cat(
     "ResearchDesigns library: ", n_all, " design",
-    if (n_all == 1L) "" else "s", "\n\n",
+    if (n_all == 1L) "" else "s",
+    "\n",
     sep = ""
   )
   if (n_all > 0L) {
-    alias <- as.character(x$alias)
-    alias[is.na(alias)] <- ""
-
-    params_chr <- if ("params" %in% names(x)) as.character(x$params) else rep(NA_character_, n_all)
-    show_params <- any(!is.na(params_chr) & nzchar(trimws(params_chr)))
-
-    pkgs <- if ("packages" %in% names(x)) as.character(x$packages) else rep("", n_all)
-    pkgs[is.na(pkgs)] <- ""
-    has_pkg <- nzchar(trimws(pkgs))
-
-    summary <- data.frame(
-      id = as.character(x$id),
-      alias = alias,
-      label = as.character(x$label),
-      stringsAsFactors = FALSE
-    )
-    if (show_params) summary$params <- params_chr
-
-    n_show <- max(1L, as.integer(n)[1])
-    print(utils::head(summary, n_show), row.names = FALSE, right = FALSE, ...)
-    if (n_all > n_show) {
-      cat("\n... and ", n_all - n_show, " more.\n", sep = "")
+    if (is.null(list_all)) {
+      list_all <- isTRUE(attr(x, "list_all"))
     }
-    if (any(has_pkg)) {
-      cat(
-        "\nPackages: ",
-        paste(sprintf("%s (%s)", x$id[has_pkg], trimws(pkgs[has_pkg])), collapse = "; "),
-        "\n",
-        sep = ""
-      )
+    n_show <- if (isTRUE(list_all)) n_all else max(1L, as.integer(n)[1])
+    grp <- design_list_group(x$id, x$category)
+    headings <- c(
+      "* Getting started",
+      "* Other design templates",
+      "* Other RDSS designs",
+      "* Other designs"
+    )
+    truncated <- FALSE
+    for (g in 1:4) {
+      rows <- x[grp == g, , drop = FALSE]
+      if (!nrow(rows)) next
+      cat("\n", headings[[g]], "\n", sep = "")
+      show <- rows
+      extra <- 0L
+      # Always list the starter sequence in full; cap other groups at n.
+      cap_group <- g != 1L && nrow(rows) > n_show
+      if (cap_group) {
+        show <- rows[seq_len(n_show), , drop = FALSE]
+        extra <- nrow(rows) - n_show
+        truncated <- TRUE
+      }
+      for (i in seq_len(nrow(show))) {
+        lab <- as.character(show$label[[i]] %||% "")
+        cat("  ", show$id[[i]], " (", lab, ")\n", sep = "")
+      }
+      if (extra > 0L) {
+        cat("  ... and ", extra, " more\n", sep = "")
+      }
+    }
+    if (truncated) {
+      cat("\nprint(list_designs(), list_all = TRUE) lists every design.\n")
     }
   }
   cat(
     "\nSee design_info(\"id\") or get_args(\"id\") for details;\n",
-    "as.data.frame(list_designs()) for the full table.\n",
+    "as.data.frame(list_designs(discover_params = TRUE)) for parameters.\n",
     sep = ""
   )
   invisible(x)
@@ -222,7 +299,8 @@ print.research_designs_list <- function(x, ..., n = 5L) {
 #' Design metadata (YAML + defaults)
 #'
 #' Printing uses short English prose. The underlying list is unchanged for
-#' programmatic use (`info$id`, `info$params`, `info$diagnosands`, etc.).
+#' programmatic use (`info$id`, `info$params`, `info$diagnosands`, `info$coupled`,
+#' etc.).
 #'
 #' @param design Design id or book alias.
 #' @return A named list of metadata with class `research_designs_info`.
@@ -296,7 +374,13 @@ print.research_designs_info <- function(x, ...) {
     for (i in seq_len(nrow(args))) {
       tip <- args$tip[[i]]
       val <- args$value_str[[i]] %||% ""
+      kind <- if ("kind" %in% names(args)) args$kind[[i]] else "scalar"
       line <- sprintf("  %s = %s", args$name[[i]], val)
+      if (identical(kind, "data") || identical(kind, "function")) {
+        line <- paste0(line, " [R only: make_design(..., ", args$name[[i]], " = ...)]")
+      } else if (identical(kind, "vector")) {
+        line <- paste0(line, " [vector]")
+      }
       if (!is.null(tip) && length(tip) && !is.na(tip) && nzchar(tip)) {
         line <- paste0(line, " — ", tip)
       }
@@ -335,6 +419,14 @@ print.research_designs_info <- function(x, ...) {
     }
   }
 
+  notes <- coupled_notes(x)
+  if (length(notes)) {
+    cat("\nCoupled parameters:\n")
+    for (note in notes) {
+      cat("  ", note, "\n", sep = "")
+    }
+  }
+
   link <- x$book_link
   if (!is.null(link) && length(link) && !is.na(link) && nzchar(as.character(link)[[1]])) {
     cat("\nBook reference:\n  ", as.character(link)[[1]], "\n", sep = "")
@@ -352,7 +444,10 @@ print.research_designs_info <- function(x, ...) {
 #'
 #' Loads the declared design at its defaults. Named `...` values are applied
 #' with [DeclareDesignZero::redesign()]. The design object is the source of
-#' truth for which names can be changed; see [get_args()].
+#' truth for which names can be changed; see [get_args()]. Vector parameters
+#' are wrapped so `redesign()` replaces the whole vector instead of sweeping.
+#' YAML `coupled:` drivers (for example `m_arms`) emit a `message()` when
+#' dependents do not match in length; `redesign()` still runs.
 #'
 #' In RStudio, Positron, and other tools that complete from formals, typing
 #' `make_design("` and pressing Tab lists installed design ids (and aliases).
@@ -378,7 +473,8 @@ make_design <- function(design = "two_arm_trial", ...) {
   d <- eval_design(parsed)
   dots <- list(...)
   if (!length(dots)) return(d)
-  unknown <- setdiff(names(dots), discover_design_params(d, code = parsed$code)$name)
+  params <- discover_design_params(d, code = parsed$code)
+  unknown <- setdiff(names(dots), params$name)
   unknown <- unknown[nzchar(unknown %||% "")]
   if (length(unknown)) {
     stop(
@@ -388,7 +484,17 @@ make_design <- function(design = "two_arm_trial", ...) {
       call. = FALSE
     )
   }
-  do.call(DeclareDesignZero::redesign, c(list(design = d), dots))
+  dots <- prepare_redesign_dots(params, dots)
+  shown <- message_coupled_if_needed(parsed$meta, dots, design = d, code = parsed$code)
+  d <- do.call(DeclareDesignZero::redesign, c(list(design = d), dots))
+  if (inherits(d, "design")) {
+    extra <- setdiff(
+      coupled_issues(parsed$meta, list(), design = d, code = parsed$code),
+      shown
+    )
+    for (note in extra) message(note)
+  }
+  d
 }
 
 #' Editable parameters for a design
@@ -396,8 +502,15 @@ make_design <- function(design = "two_arm_trial", ...) {
 #' Reads parameters from the design object. Optional YAML `params:` entries
 #' only add tips (and never invent new parameter names).
 #'
+#' The `kind` column is `"scalar"`, `"vector"`, `"data"`, or `"function"`.
+#' `shiny` is `TRUE` for scalar and short-vector parameters that the browser
+#' can edit as text. Data frames, matrices, long vectors, and functions stay
+#' redesignable in R (`make_design(..., data = ...)`, `make_design(..., Y = ...)`)
+#' but are not Shiny controls.
+#'
 #' @param design Design id or book alias.
-#' @return A data frame with `name`, `default`, `value_str`, and `tip`.
+#' @return A data frame with `name`, `default`, `value_str`, `tip`, `kind`,
+#'   and `shiny`.
 #' @export
 get_args <- function(design) {
   if (length(design) > 1L) design <- design[[1L]]

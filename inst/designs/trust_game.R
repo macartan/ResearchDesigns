@@ -9,6 +9,10 @@ description: >
 params:
   "deceive": "Whether the trust-game design allows deception"
   "n_pairs": "Number of pairs"
+  "invested": "Function: first-mover investment given types a_1 and a_2 (R-only)"
+  "average_invested": "Function: expected investment for a type, averaging over partners (R-only)"
+  "returned": "Function: second-mover return given investment and type a_2 (R-only)"
+  "average_returned": "Function: expected return for a type, averaging over investments (R-only)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num6
 include_in_shiny: true
 ---

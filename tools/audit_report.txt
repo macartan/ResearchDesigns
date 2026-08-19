@@ -1,12 +1,26 @@
-ResearchDesigns audit: 65/65 ok
+ResearchDesigns audit: 67/67 ok
 (Order: FAIL, SKIP/parked, OK-with-notes, OK)
 
- - cluster_random_sampling: OK
-     no YAML tip (ok): locality_shock, individual_shock
- - conditional_expectation: OK
-     assigned before design but not redesignable: polynomial_degrees
+ - conjoint: OK
+     no YAML tip (ok): conjoint_utility
+ - italian_village_bayes: OK
+     no YAML tip (ok): summary_fn
+ - logit_probit_ols: OK
+     no YAML tip (ok): tidy_margins
+ - matching: OK
+     no YAML tip (ok): exact_matching
  - network_experiment: OK
-     no YAML tip (ok): adjacency, permutations
+     no YAML tip (ok): estimator_AS
+ - random_forests: OK
+     no YAML tip (ok): f_Y, get_best_predictor
+ - regression_discontinuity: OK
+     no YAML tip (ok): control, treatment
+ - regression_discontinuity_fuzzy: OK
+     no YAML tip (ok): control, treatment
+ - structural_estimation: OK
+     no YAML tip (ok): offer, likelihood
+ - trust_game: OK
+     no YAML tip (ok): invested, average_invested, returned, average_returned
  - audit_experiment: OK
  - audit_intervention: OK
  - bare_bones_two_arm: OK
@@ -15,7 +29,8 @@ ResearchDesigns audit: 65/65 ok
  - block_randomized_trial: OK
  - blocked_and_clustered: OK
  - bootstrapped: OK
- - conjoint: OK
+ - cluster_random_sampling: OK
+ - conditional_expectation: OK
  - covariate_adjustment: OK
  - declaration_using_declare: OK
  - design_10_2: OK
@@ -27,37 +42,30 @@ ResearchDesigns audit: 65/65 ok
  - factorial_2x2x2: OK
  - instrumental_variables: OK
  - italian_village: OK
- - italian_village_bayes: OK
  - italian_village_continued: OK
  - latent_variables: OK
  - lin_estimator: OK
  - linear_regression: OK
  - list_experiment: OK
  - list_or_direct_questions: OK
- - logit_probit_ols: OK
- - matching: OK
  - mediation_analysis: OK
- - multi_arm_three: OK
  - multi_site_studies: OK
+ - multiarm_trial: OK
  - multilevel: OK
  - multilevel_answer_strategies: OK
  - pate_with_sampling: OK
  - population_estimands: OK
  - pretest_posttest: OK
  - process_tracing: OK
- - random_forests: OK
  - randomization_inference: OK
  - randomized_response: OK
  - randomized_saturation: OK
- - regression_discontinuity: OK
- - regression_discontinuity_fuzzy: OK
  - simple_random_sampling: OK
  - single_period_two_arm: OK
  - stepped_wedge: OK
- - structural_estimation: OK
  - subgroup_effects: OK
  - survey_nonresponse: OK
- - trust_game: OK
+ - two_arm: OK
  - two_arm_attrition: OK
  - two_arm_randomized_experiment: OK
  - two_arm_trial: OK
@@ -65,6 +73,7 @@ ResearchDesigns audit: 65/65 ok
  - two_arm_trial_rdss: OK
  - two_arm_with_blocks: OK
  - two_arm_with_blocks_rdss: OK
+ - two_by_two: OK
  - two_outcome_model_a: OK
  - two_outcome_model_b: OK
  - uncertainty_over_effect_size: OK

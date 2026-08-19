@@ -4,20 +4,31 @@
 \alias{list_designs}
 \title{List designs in the library}
 \usage{
-list_designs(shiny_only = FALSE, discover_params = TRUE)
+list_designs(shiny_only = FALSE, discover_params = FALSE, list_all = FALSE)
 }
 \arguments{
 \item{shiny_only}{If \code{TRUE}, only designs with \code{include_in_shiny: true}
 (the default when the field is omitted).}
 
-\item{discover_params}{If \code{TRUE} (default), load each design once to list
-redesignable parameters. Set \code{FALSE} for a metadata-only scan.}
+\item{discover_params}{If \code{TRUE}, load each design once to list
+redesignable parameters (overrides index names). Default \code{FALSE} uses
+baked index names and does not evaluate designs.}
+
+\item{list_all}{If \code{FALSE} (default), printing shows the full getting-started
+sequence and up to 10 designs in each remaining group. If \code{TRUE}, printing
+lists every design.}
 }
 \value{
 A data frame with class \code{research_designs_list}.
 }
 \description{
-Returns a data frame of design metadata. Printing shows a compact summary
-(\code{id}, \code{alias}, modifiable parameters). Use \code{\link[=design_info]{design_info()}}, \code{\link[=get_args]{get_args()}},
-or \code{as.data.frame()} / \code{print(as.data.frame(x))} for the full table.
+Returns a data frame of design metadata. Printing is a grouped list of
+\code{id (label)} lines, starting with a short getting-started sequence, then
+other templates, RDSS, and remaining designs. Default listing is
+metadata-only (baked library index plus a live-file overlay). The \code{params}
+column is a comma-separated name string from that index (YAML \verb{params:}
+keys plus pre-design assignment names); designs are not evaluated. Use
+\code{\link[=design_info]{design_info()}}, \code{\link[=get_args]{get_args()}}, or
+\code{as.data.frame(list_designs(discover_params = TRUE))} for redesignable
+parameters from a loaded design. Row order matches print order.
 }

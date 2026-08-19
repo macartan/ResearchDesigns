@@ -7,6 +7,8 @@ keywords: [observational, descriptive]
 description: >
   Multilevel regression and poststratification design. (chapter 15).
 packages: [rdss, lme4, dplyr, tibble]
+params:
+  "states": "State-level population frame used to build the sample"
 book_link: https://book.declaredesign.org/library/observational-descriptive.html#def-ch15num4
 include_in_shiny: true
 ---

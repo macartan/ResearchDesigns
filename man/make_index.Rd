@@ -4,11 +4,21 @@
 \alias{make_index}
 \title{Build an in-memory index of all designs}
 \usage{
-make_index()
+make_index(use_cache = TRUE)
+}
+\arguments{
+\item{use_cache}{If \code{TRUE} (default), use the baked index with a live-file
+overlay. If \code{FALSE}, parse YAML from every design file (used by
+\code{\link[=refresh_library]{refresh_library()}}).}
 }
 \value{
 A data frame (same columns as \code{\link[=list_designs]{list_designs()}}, plus description).
+\code{params} is a comma-separated name string from the baked index, or from
+YAML \verb{params:} keys plus pre-design assignment names for overlay files.
 }
 \description{
-Build an in-memory index of all designs
+Shared by \code{\link[=list_designs]{list_designs()}} (metadata-only default) and maintainer tools.
+When \code{use_cache = TRUE}, reads the baked \code{inst/library_index} artifact if
+live \code{.R} filenames match, and YAML-parses only extra, missing, or newer
+files so a local \code{inst/designs/my_design.R} appears without refresh.
 }

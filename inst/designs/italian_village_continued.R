@@ -22,8 +22,8 @@ declaration_9.1 <-
 
 linear_hypothesis <- "(Intercept) = 20"
 
-design <- 
+design <-
   declaration_9.1 +
-  declare_test(age ~ 1, 
-               linear_hypothesis = linear_hypothesis, 
-               .method = lh_robust, label = "test")
+  declare_test(age ~ 1,
+               linear_hypothesis = linear_hypothesis,
+               .method = estimatrZero::lh_robust, label = "test")

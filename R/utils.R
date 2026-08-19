@@ -7,7 +7,7 @@
 #' Package designs directory
 #'
 #' Prefers the source-tree `inst/designs` (or installed `designs/`) from
-#' [find_package_root()] so maintainer refresh / `list_designs()` see local
+#' `find_package_root()` so maintainer refresh / `list_designs()` see local
 #' edits. Falls back to `system.file()` for a normal installed package.
 #' @noRd
 designs_dir <- function() {
@@ -48,6 +48,26 @@ previews_dir <- function() {
     return(normalizePath(package_write_paths(root)$previews, winslash = "/", mustWork = FALSE))
   }
   stop("No previews directory found.", call. = FALSE)
+}
+
+#' Package library-index directory (read)
+#' @noRd
+library_index_dir <- function() {
+  root <- tryCatch(find_package_root(), error = function(e) NULL)
+  if (!is.null(root)) {
+    candidate <- package_write_paths(root)$index
+    if (dir.exists(candidate) || dir.exists(dirname(candidate))) {
+      return(normalizePath(candidate, winslash = "/", mustWork = FALSE))
+    }
+  }
+  path <- system.file("library_index", package = "ResearchDesigns")
+  if (nzchar(path)) {
+    return(normalizePath(path, winslash = "/", mustWork = FALSE))
+  }
+  if (!is.null(root)) {
+    return(normalizePath(package_write_paths(root)$index, winslash = "/", mustWork = FALSE))
+  }
+  stop("No library index directory found.", call. = FALSE)
 }
 
 #' Is this path a ResearchDesigns DESCRIPTION root?

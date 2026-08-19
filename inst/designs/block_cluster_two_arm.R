@@ -1,6 +1,6 @@
 ---
 id: block_cluster_two_arm
-label: blocked and clustered two-arm trial
+label: Two arm trial with blocks and clusters
 category: template
 keywords: [experiment, causal, blocking, cluster]
 description: >

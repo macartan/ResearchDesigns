@@ -14,6 +14,8 @@ params:
   "N": "Number of units (sample or population size)"
   "covariate_names": "Names of covariates used by the learner"
   "share_train": "Share of data used for training"
+  "f_Y": "Function: potential outcome given treatment, covariates, and shock (R-only)"
+  "get_best_predictor": "Function: reports the forest's top importance predictor (R-only)"
 book_link: https://book.declaredesign.org/library/complex.html#def-ch19num1
 include_in_shiny: true
 ---

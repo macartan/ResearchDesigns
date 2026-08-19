@@ -11,6 +11,7 @@ packages: [margins, broom]
 params:
   "N": "Number of units (sample or population size)"
   "b": "Treatment effect (outcome scale)"
+  "tidy_margins": "Function: tidy average marginal effects from a GLM (R-only)"
 diagnosands: rmse, bias
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num5
 include_in_shiny: true

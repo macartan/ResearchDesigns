@@ -17,7 +17,8 @@ and \code{report}.
 }
 \description{
 Runs the contributor-facing checks and refreshes baked artifacts:
-index, audits, and diagnosis previews (\code{sims = 100} by default).
+index, audits (including a short diagnosis of every design), and
+diagnosis previews (\code{sims = 100} by default).
 Audit and preview failures are reported at the end; they do not abort
 the refresh.
 }

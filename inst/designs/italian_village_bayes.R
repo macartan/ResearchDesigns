@@ -8,11 +8,14 @@ description: >
 packages: [rdss, rstanarm]
 params:
   "N": "Number of units (sample or population size)"
+  "summary_fn": "Function: tidies the Stan fit with exponentiated coefficients (R-only)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/choosing-answer-strategy.html#def-ch9num3
 include_in_shiny: false
 ---
 
 N <- 100
+
+summary_fn <- function(fit) rdss::tidy_stan(fit, exponentiate = TRUE)
 
 design <-
   declare_model(N = N, age = sample(0:80, size = N, replace = TRUE)) +
@@ -23,6 +26,6 @@ design <-
     .method = stan_glm,
     family = gaussian(link = "log"),
     prior_intercept = normal(50, 5),
-    .summary = ~tidy_stan(., exponentiate = TRUE),
+    .summary = summary_fn,
     inquiry = "mean_age"
   )
