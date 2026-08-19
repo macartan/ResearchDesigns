@@ -6,11 +6,20 @@ category: rdss
 keywords: [observational, descriptive, sampling]
 description: >
   Survey nonresponse design. (chapter 15).
+packages: [dplyr]
 params:
   "effort": "Survey effort / contact intensity (nonresponse)"
 book_link: https://book.declaredesign.org/library/observational-descriptive.html#def-ch15num2
 include_in_shiny: true
 ---
+
+set.seed(343) # fix random seed to yield a fixed population of units
+
+portola <-
+  fabricate(
+    N = 2100,
+    Y_star = rnorm(N)
+  )
 
 effort <- 0 # baseline of no extra effort
 

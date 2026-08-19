@@ -6,13 +6,18 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment design. (chapter 17).
+packages: [dplyr]
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num1
 include_in_shiny: true
 ---
 
+N <- 500
+
 design <-
   declare_model(
-    N = 500,
+    N = N,
     type = sample(
       size = N, 
       replace = TRUE,

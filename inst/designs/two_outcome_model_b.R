@@ -5,12 +5,16 @@ label: Two-outcome model B
 category: rdss
 description: >
   10.3 (chapter 10).
+params:
+  "N": "Number of units (sample or population size)"
 include_in_shiny: false
 ---
 
+N <- 200
+
 design  <-
   declare_model(
-    N = 200,
+    N = N,
     U = rnorm(N),
     potential_outcomes(Y1 ~ 0.0 * Z + U),
     potential_outcomes(Y2 ~ 0.2 * Z + U)

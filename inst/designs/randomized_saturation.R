@@ -6,6 +6,7 @@ category: rdss
 keywords: [experiment, causal]
 description: >
   Randomized saturation design. (chapter 18).
+packages: [dplyr]
 params:
   "N_groups": "Number of groups / clusters"
   "N_per_group": "Individuals per group"

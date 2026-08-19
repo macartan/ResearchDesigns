@@ -5,8 +5,9 @@ label: Conditional expectation function
 category: rdss
 description: >
   Conditional expectation function design (chapter 11).
-packages: [purrr, tibble]
+packages: [purrr, tibble, dplyr, tidyr, stringr]
 params:
+  "N": "Number of units (sample or population size)"
   "x_range": "Support / range of the running covariate X"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num4
 include_in_shiny: false
@@ -19,9 +20,11 @@ x_range <- seq(from = 0, to = 3, length.out = 50)
 # Used inside the estimator handler (not always redesignable via the design finder)
 polynomial_degrees <- 1:6
 
+N <- 100
+
 design <-
   declare_model(
-    N = 100,
+    N = N,
     X = runif(N, 0, 3)) +
   declare_inquiry(
     X = x_range, inquiry = str_c("X_", X), estimand = dip(X),

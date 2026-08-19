@@ -6,7 +6,7 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Conjoint experiment design. (chapter 17).
-packages: [rdss, cjoint]
+packages: [rdss, cjoint, dplyr, purrr]
 params:
   "N_subjects": "Number of subjects"
   "N_tasks": "Number of conjoint tasks per subject"

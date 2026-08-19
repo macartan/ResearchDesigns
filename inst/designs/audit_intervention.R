@@ -6,14 +6,19 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment intervention study design. (chapter 17).
+packages: [dplyr]
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num2
 include_in_shiny: true
 ---
 
+N <- 5000
+
 design <-
   # This part of the design is about causal inference
   declare_model(
-    N = 5000,
+    N = N,
     type_D_0 = sample(
       size = N,
       replace = TRUE,

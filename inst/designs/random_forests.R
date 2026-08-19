@@ -9,7 +9,9 @@ description: >
   effect heterogeneity. The design targets individual level causal
   effects and identifies which variables are mostly commonly used to
   predict causal effects.
+packages: [dplyr, grf]
 params:
+  "N": "Number of units (sample or population size)"
   "covariate_names": "Names of covariates used by the learner"
   "share_train": "Share of data used for training"
 book_link: https://book.declaredesign.org/library/complex.html#def-ch19num1
@@ -28,9 +30,13 @@ get_best_predictor <-
   function(data) select(data, estimate = var_imp) |> 
   dplyr::slice(1)
 
+share_train <- 0.5
+
+N <- 1000
+
 design <- 
   declare_model(
-    N = 1000,  
+    N = N,  
     X = matrix(rnorm(10 * N), N),
     U = rnorm(N),
     Z = simple_ra(N)) + 
@@ -45,7 +51,7 @@ design <-
   declare_measurement(
     handler = causal_forest_handler, 
     covariate_names = covariate_names,
-    share_train = 0.5
+    share_train = share_train
   ) +
   declare_measurement(
     handler = fabricate, 

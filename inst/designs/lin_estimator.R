@@ -7,6 +7,7 @@ keywords: [experiment, causal]
 description: >
   Lin estimator design. (chapter 18).
 params:
+  "N": "Number of units (sample or population size)"
   "control_slope": "Slope of the control outcome surface on the covariate"
   "prob": "Probability of assignment to treatment"
 book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num3
@@ -16,8 +17,10 @@ include_in_shiny: true
 prob = 0.5
 control_slope = -1
 
+N <- 100
+
 design <-
-  declare_model(N = 100,
+  declare_model(N = N,
                 X = runif(N, 0, 1),
                 U = rnorm(N, sd = 0.1),
                 Y_Z_1 = 1*X + U,

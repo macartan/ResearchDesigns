@@ -5,12 +5,16 @@ label: Declaration of two-arm randomized experiment
 category: rdss
 description: >
   Declaration of two-arm randomized experiment (chapter 13).
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaration-in-code.html#def-ch13num2
 include_in_shiny: false
 ---
 
+N <- 1000
+
 design <-
-  declare_model(N = 1000,
+  declare_model(N = N,
                 U = rnorm(N),
                 X = U + rnorm(N, sd = 0.5),
                 potential_outcomes(Y ~  0.2 * Z + U)) +

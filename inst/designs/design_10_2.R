@@ -5,12 +5,16 @@ label: design 10 2
 category: rdss
 description: >
   10.2 (chapter 10).
+params:
+  "N": "Number of units (sample or population size)"
 include_in_shiny: false
 ---
 
+N <- 200
+
 design <-
   declare_model(
-    N = 200, U = rnorm(N),
+    N = N, U = rnorm(N),
     # this runif(n = 1, min = 0, max = 0.5) 
     # generates 1 random ATE between 0 and 0.5
     potential_outcomes(Y ~ runif(n = 1, min = 0, max = 0.5) * Z + U)) +

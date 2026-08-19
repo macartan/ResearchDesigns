@@ -6,6 +6,7 @@ category: rdss
 keywords: [experiment, causal]
 description: >
   Encouragement design. (chapter 18).
+packages: [dplyr]
 params:
   "N": "Number of units (sample or population size)"
   "share_always_takers": "Share of always-takers"

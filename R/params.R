@@ -108,6 +108,19 @@ validate_params_against_design <- function(meta, design, code = NULL) {
   )
 }
 
+#' Parse an RHS fragment, treating an empty one as incomplete
+#'
+#' `parse(text = "")` succeeds and returns a zero-length expression, so a
+#' fragment that is only whitespace has to read as "not finished yet" or the
+#' caller stops accumulating continuation lines the moment it sees a `<-` at
+#' the end of a line.
+#' @noRd
+parse_rhs <- function(rhs) {
+  expr <- tryCatch(parse(text = rhs), error = function(e) NULL)
+  if (is.null(expr) || !length(expr)) return(NULL)
+  expr
+}
+
 #' Top-level assignments appearing before `design <-` in a design file
 #'
 #' @param code Character scalar (R code without YAML).
@@ -139,17 +152,20 @@ extract_pre_design_objects <- function(code) {
     ln <- head_lines[[i]]
     i <- i + 1L
     if (grepl("^\\s*#", ln) || !nzchar(trimws(ln))) next
-    if (!grepl("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*<-\\s*", ln)) next
+    # `<-` or a top-level `=`; `==` is a comparison, not an assignment
+    if (!grepl("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*(<-|=(?!=))\\s*", ln, perl = TRUE)) next
     if (grepl("^\\s*(if|for|while)\\b", ln)) next
-    nm <- sub("^\\s*([A-Za-z.][A-Za-z0-9._]*)\\s*<-.*$", "\\1", ln)
-    rhs <- sub("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*<-\\s*", "", ln)
+    nm <- sub("^\\s*([A-Za-z.][A-Za-z0-9._]*)\\s*(<-|=).*$", "\\1", ln)
+    rhs <- sub("^\\s*[A-Za-z.][A-Za-z0-9._]*\\s*(<-|=)\\s*", "", ln)
 
-    # Accumulate continuation lines until the RHS parses (multi-line declare_* etc.)
-    expr <- tryCatch(parse(text = rhs), error = function(e) NULL)
+    # Accumulate continuation lines until the RHS parses (multi-line declare_* etc.).
+    # An RHS of "" parses to a zero-length expression, so a `name <-` that ends
+    # the line has to keep reading or every multi-line assignment reads as empty.
+    expr <- parse_rhs(rhs)
     while (is.null(expr) && i <= n) {
       rhs <- paste(rhs, head_lines[[i]], sep = "\n")
       i <- i + 1L
-      expr <- tryCatch(parse(text = rhs), error = function(e) NULL)
+      expr <- parse_rhs(rhs)
     }
     rhs <- trimws(rhs)
 

@@ -5,13 +5,17 @@ label: Example of declaration using Declare
 category: rdss
 description: >
   Example of declaration using DeclareDesign (chapter 10).
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/diagnosing-designs.html#def-ch10num1
 include_in_shiny: false
 ---
 
+N <- 100
+
 design <-
   declare_model(
-    N = 100,
+    N = N,
     U = rnorm(N),
     potential_outcomes(Y ~  0.2 * Z + U)
   ) +

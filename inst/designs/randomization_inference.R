@@ -5,6 +5,7 @@ label: Randomization inference under the sharp null.
 category: rdss
 description: >
   Randomization inference under the sharp null. (chapter 9).
+packages: [rdss, ri2]
 params:
   "block_m": "Number treated per block (for blocked assignment / RI)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/choosing-answer-strategy.html#def-ch9num7

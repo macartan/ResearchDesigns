@@ -5,6 +5,7 @@ label: list or direct questions?
 category: rdss
 description: >
   Comparing list experiments with direct questions. (chapter 17).
+packages: [dplyr]
 params:
   "N": "Number of units (sample or population size)"
   "proportion_hiding": "Share of respondents who hide sensitive traits"

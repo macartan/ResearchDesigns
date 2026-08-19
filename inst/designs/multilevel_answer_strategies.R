@@ -6,8 +6,6 @@ category: rdss
 keywords: [observational, descriptive]
 description: >
   Redesign over answer strategies. (chapter 15).
-params:
-  "states": "A dataframe of states"
 packages: [rdss, lme4, dplyr, tibble]
 book_link: https://book.declaredesign.org/library/observational-descriptive.html#def-ch15num5
 include_in_shiny: false
