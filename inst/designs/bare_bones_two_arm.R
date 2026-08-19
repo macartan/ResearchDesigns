@@ -7,11 +7,13 @@ description: >
   Bare-bones two-arm trial (chapter 11).
 params:
   "N": "Number of units (sample or population size)"
+  "prob": "Probability of assignment to treatment"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num3
 include_in_shiny: false
 ---
 
 N <- 100
+prob <- 0.5
 
 design <-
   declare_model(N = N, U = rnorm(N),
