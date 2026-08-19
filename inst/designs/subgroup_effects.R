@@ -9,8 +9,7 @@ description: >
 params:
   "n_x1": "Sample size in subgroup X1 (or size allocated to X1)"
   "total_n": "Total sample size"
-  "fixed_pop": "A fixed population df"
-  book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num6
+book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num6
 include_in_shiny: true
 ---
 
