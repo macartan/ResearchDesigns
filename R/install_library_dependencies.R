@@ -7,7 +7,9 @@ github_package_sources <- function() {
   # installed package names are unchanged.
   c(
     fabricatrZero = "DeclareDesign/fabricatr@rewrite",
-    DeclareDesignZero = "DeclareDesign/DeclareDesign@rewrite"
+    DeclareDesignZero = "DeclareDesign/DeclareDesign@rewrite",
+    # network_experiment needs this and it has never been on CRAN
+    interference = "szonszein/interference"
   )
 }
 

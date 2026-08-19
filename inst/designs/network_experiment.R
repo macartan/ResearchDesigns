@@ -6,15 +6,18 @@ category: rdss
 keywords: [experiment, causal]
 description: >
   Experiments over spatial networks design. (chapter 18).
-  Parked: the interference package is not currently installable from CRAN.
 packages: [rdss, spdep, interference, tidyverse]
 params:
   "controlled_direct_effect": "Controlled direct effect size"
   "controlled_indirect_effect": "Controlled indirect effect size"
   "total_effect": "Total effect size"
 book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num13
+# runs and diagnoses, but the design's adjacency and permutation matrices are
+# discovered as editable parameters, so the browser would offer two controls
+# that cannot sensibly be typed into. Turn this on once
+# filter_modifiable_params() drops objects with a dim attribute.
 include_in_shiny: false
-functional: false
+functional: true
 ---
 
 # This is a complex design with many pre-prepared objects
@@ -106,5 +109,3 @@ design <-
                     p_matrix = permutations, 
                     adj_matrix = adjacency,
                     obs_prob_exposure = prob_exposure)
-
-declaration_18.13
