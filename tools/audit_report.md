@@ -1,6 +1,6 @@
 # ResearchDesigns audit report
 
-Summary: **57/58** designs OK, **1** parked (`functional: false`).
+Summary: **61/62** designs OK, **1** parked (`functional: false`).
 
 Issue types: `missing_packages`, `yaml_extra_params`, `param_discovery`, `load_error`, `missing_object`, `diagnose_failed`, `disabled`, `other`.
 

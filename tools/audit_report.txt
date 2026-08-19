@@ -1,4 +1,4 @@
-ResearchDesigns audit: 57/58 ok, 1 parked
+ResearchDesigns audit: 61/62 ok, 1 parked
 (Order: FAIL, SKIP/parked, OK-with-notes, OK)
 
  - network_experiment: SKIP [disabled] - functional: false (parked; skipped by audit)
@@ -33,14 +33,17 @@ ResearchDesigns audit: 57/58 ok, 1 parked
  - list_or_direct_questions: OK
  - logit_probit_ols: OK
  - matching: OK
+ - multi_arm_three: OK
  - multi_site_studies: OK
  - multilevel: OK
  - multilevel_answer_strategies: OK
  - pate_with_sampling: OK
  - population_estimands: OK
+ - pretest_posttest: OK
  - process_tracing: OK
  - random_forests: OK
  - randomization_inference: OK
+ - randomized_response: OK
  - randomized_saturation: OK
  - regression_discontinuity: OK
  - regression_discontinuity_fuzzy: OK
@@ -51,6 +54,7 @@ ResearchDesigns audit: 57/58 ok, 1 parked
  - subgroup_effects: OK
  - survey_nonresponse: OK
  - trust_game: OK
+ - two_arm_attrition: OK
  - two_arm_randomized_experiment: OK
  - two_arm_trial: OK
  - two_arm_trial_library: OK
