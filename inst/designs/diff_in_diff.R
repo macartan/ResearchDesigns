@@ -54,6 +54,13 @@ design <-
     inquiry = c("ATT", "ATT_switchers"),
     label = "twoway-fe"
   ) +
+  # KNOWN ISSUE, upstream and not ours: under DIDmultiplegt 2.1.0 this estimator
+  # returns NaN on this design's data. The data is a clean staggered adoption
+  # panel (10 never-treated units, 10 adopting at different periods, absorbing),
+  # which is what did_multiplegt is for. Checked outside DeclareDesign entirely,
+  # and via did_multiplegt_old, did_multiplegt(mode = "old") and mode passed
+  # trailing: all three give NaN, so it is not the argument convention and not
+  # the quoted-name workaround. tools/check_designs_isolated.R flags it.
   declare_estimator(
     Y = "Y", 
     G = "units", 
