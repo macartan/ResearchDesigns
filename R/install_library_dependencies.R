@@ -1,10 +1,13 @@
 #' GitHub sources for Imports not on CRAN
 #' @noRd
 github_package_sources <- function() {
-  # fabricatrZero before DeclareDesignZero (DD imports fabricatr)
+  # fabricatrZero before DeclareDesignZero (DD imports fabricatr).
+  # The standalone *Zero repos are archived and private; the rewrite branches of
+  # the parent repos carry the same sources and still build as *Zero, so the
+  # installed package names are unchanged.
   c(
-    fabricatrZero = "DeclareDesign/fabricatrZero",
-    DeclareDesignZero = "DeclareDesign/DeclareDesignZero"
+    fabricatrZero = "DeclareDesign/fabricatr@rewrite",
+    DeclareDesignZero = "DeclareDesign/DeclareDesign@rewrite"
   )
 }
 
