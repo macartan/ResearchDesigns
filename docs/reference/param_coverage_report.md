@@ -7,7 +7,11 @@ design but do not appear in that parameter list.
 ## Usage
 
 ``` r
-param_coverage_report(designs = NULL, atomic_only = FALSE)
+param_coverage_report(
+  designs = NULL,
+  atomic_only = FALSE,
+  include_steps = FALSE
+)
 ```
 
 ## Arguments
@@ -19,7 +23,11 @@ param_coverage_report(designs = NULL, atomic_only = FALSE)
 - atomic_only:
 
   If `TRUE`, only report atomic gaps (likely should be redesignable). If
-  `FALSE`, also report helpers, models, etc.
+  `FALSE`, also report other non-step gaps (e.g. data frames).
+
+- include_steps:
+
+  If `TRUE`, also report design pieces.
 
 ## Value
 

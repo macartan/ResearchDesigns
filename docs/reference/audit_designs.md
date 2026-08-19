@@ -9,12 +9,7 @@ the redesignable parameter list (see
 ## Usage
 
 ``` r
-audit_designs(
-  designs = NULL,
-  sims = NULL,
-  write_report = TRUE,
-  report_dir = NULL
-)
+audit_designs(designs = NULL, sims = 2, write_report = TRUE, report_dir = NULL)
 ```
 
 ## Arguments
@@ -25,7 +20,8 @@ audit_designs(
 
 - sims:
 
-  If not `NULL`, run a short `diagnose_design()` with this many sims.
+  Number of simulations for a short `diagnose_design()` (default 2). If
+  `NULL`, skip the run check (load and params only).
 
 - write_report:
 
@@ -40,6 +36,13 @@ audit_designs(
 An object of class `research_designs_audit`.
 
 ## Details
+
+By default each design is diagnosed with a short `diagnose_design()` run
+(`sims = 2`). A design that loads but does not run is a failure. Pass
+`sims = NULL` only for a load-and-params scan while editing a single
+file;
+[`refresh_library()`](https://macartan.github.io/ResearchDesigns/reference/refresh_library.md)
+and the test suite always run the design.
 
 Failures are collected per design and (by default) written to
 `tools/audit_report.csv`, `tools/audit_report.md`, and

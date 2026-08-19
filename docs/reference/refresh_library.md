@@ -1,9 +1,9 @@
 # Refresh the library (maintainer one-stop)
 
 Runs the contributor-facing checks and refreshes baked artifacts: index,
-audits, and diagnosis previews (`sims = 100` by default). Audit and
-preview failures are reported at the end; they do not abort the refresh.
-See `tools/refresh_report.txt`.
+audits (including a short diagnosis of every design), and diagnosis
+previews (`sims = 100` by default). Audit and preview failures are
+reported at the end; they do not abort the refresh.
 
 ## Usage
 

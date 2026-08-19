@@ -84,3 +84,39 @@ Index, audit, bake previews, refresh the library, and build the site.
 - [`param_coverage_gaps()`](https://macartan.github.io/ResearchDesigns/reference/param_coverage_gaps.md)
   : Objects declared before design, used by it, but missing from design
   params
+
+## DesignLibrary designers
+
+DesignLibrary-compatible designer functions. Working ports call
+[`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md);
+unported names are stubs that point to related library designs.
+
+### Working designers
+
+- [`two_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_arm_designer.md)
+  : Create a one-level two-arm design
+- [`two_arm_attrition_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_arm_attrition_designer.md)
+  : Create a two-arm design with attrition
+- [`pretest_posttest_designer()`](https://macartan.github.io/ResearchDesigns/reference/pretest_posttest_designer.md)
+  : Create a pretest-posttest design
+- [`randomized_response_designer()`](https://macartan.github.io/ResearchDesigns/reference/randomized_response_designer.md)
+  : Create a randomized response design
+- [`mediation_analysis_designer()`](https://macartan.github.io/ResearchDesigns/reference/mediation_analysis_designer.md)
+  : Create a mediation analysis design
+- [`multi_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/multi_arm_designer.md)
+  : Create a multi-arm design
+- [`two_by_two_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_by_two_designer.md)
+  : Create a two-by-two factorial design
+- [`block_cluster_two_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/block_cluster_two_arm_designer.md)
+  : Create a blocked and clustered two-arm design
+
+### Unported stubs
+
+- [`binary_iv_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`cluster_sampling_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`factorial_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`process_tracing_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`regression_discontinuity_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`spillover_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  [`two_arm_covariate_designer()`](https://macartan.github.io/ResearchDesigns/reference/designers-not-ported.md)
+  : DesignLibrary designers not ported as-is

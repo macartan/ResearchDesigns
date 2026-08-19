@@ -13,7 +13,7 @@ redesignable parameter list (see param_coverage_report())."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ResearchDesigns</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,12 +51,7 @@ redesignable parameter list (see <code><a href="param_coverage_report.html">para
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">audit_designs</span><span class="op">(</span></span>
-<span>  designs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  sims <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  write_report <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  report_dir <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">audit_designs</span><span class="op">(</span>designs <span class="op">=</span> <span class="cn">NULL</span>, sims <span class="op">=</span> <span class="fl">2</span>, write_report <span class="op">=</span> <span class="cn">TRUE</span>, report_dir <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,7 +63,8 @@ redesignable parameter list (see <code><a href="param_coverage_report.html">para
 
 
 <dt id="arg-sims">sims<a class="anchor" aria-label="anchor" href="#arg-sims"></a></dt>
-<dd><p>If not <code>NULL</code>, run a short <code>diagnose_design()</code> with this many sims.</p></dd>
+<dd><p>Number of simulations for a short <code>diagnose_design()</code> (default
+2). If <code>NULL</code>, skip the run check (load and params only).</p></dd>
 
 
 <dt id="arg-write-report">write_report<a class="anchor" aria-label="anchor" href="#arg-write-report"></a></dt>
@@ -85,7 +81,11 @@ redesignable parameter list (see <code><a href="param_coverage_report.html">para
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Failures are collected per design and (by default) written to
+    <p>By default each design is diagnosed with a short <code>diagnose_design()</code> run
+(<code>sims = 2</code>). A design that loads but does not run is a failure. Pass
+<code>sims = NULL</code> only for a load-and-params scan while editing a single file;
+<code><a href="refresh_library.html">refresh_library()</a></code> and the test suite always run the design.</p>
+<p>Failures are collected per design and (by default) written to
 <code>tools/audit_report.csv</code>, <code>tools/audit_report.md</code>, and
 <code>tools/audit_report.txt</code> (FAIL/SKIP first, then OK) under the package root
 via <code><a href="write_audit_report.html">write_audit_report()</a></code>. Soft notes (undocumented params, coverage gaps)

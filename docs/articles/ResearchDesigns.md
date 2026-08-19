@@ -67,30 +67,47 @@ the maintainer audits, and
 
 ``` r
 
-list_designs(discover_params = FALSE)
-#> ResearchDesigns library: 58 designs
+list_designs()
+#> ResearchDesigns library: 67 designs
 #> 
-#>  id                  alias label                                               
-#>  two_arm_trial             Simple two-arm trial                                
-#>  two_arm_with_blocks       Two-arm trial with blocks                           
-#>  baseline_over_N     11.1  A baseline declaration intended to be reed over $N$.
-#>  audit_experiment    17.1  audit experiment                                    
-#>  audit_intervention  17.2  audit intervention                                  
+#> * Getting started
+#>   two_arm_trial (Simple two-arm trial)
+#>   two_arm (Flexible two-arm trial (library))
+#>   multiarm_trial (Multi-arm trial)
+#>   two_arm_with_blocks (Two-arm trial with blocks)
+#>   block_cluster_two_arm (Two arm trial with blocks and clusters)
+#>   two_arm_attrition (Two-arm trial with attrition)
+#>   two_by_two (2x2 factorial (library))
+#>   factorial_2x2x2 (2x2x2 factorial)
+#>   pretest_posttest (Pretest-posttest design)
+#>   randomized_response (Randomized response)
+#>   mediation_analysis (Mediation analysis)
 #> 
-#> ... and 53 more.
+#> * Other RDSS designs
+#>   audit_experiment (audit experiment)
+#>   audit_intervention (audit intervention)
+#>   bare_bones_two_arm (Bare-bones two-arm trial)
+#>   baseline_over_N (A baseline declaration intended to be reed over $N$.)
+#>   block_randomized_trial (block randomized trial)
+#>   blocked_and_clustered (blocked and clustered)
+#>   bootstrapped (bootstrapped)
+#>   cluster_random_sampling (cluster random sampling)
+#>   conditional_expectation (Conditional expectation function)
+#>   conjoint (conjoint)
+#>   ... and 46 more
 #> 
-#> Packages: conditional_expectation (purrr, tibble); conjoint (rdss, cjoint); diff_in_diff (rdss, DIDmultiplegt); italian_village_bayes (rdss, rstanarm); logit_probit_ols (margins, broom); matching (MatchIt); multi_site_studies (metafor); multilevel (rdss, lme4, dplyr, tibble); network_experiment (rdss, spdep, interference, tidyverse); process_tracing (rdss, CausalQueries); multilevel_answer_strategies (rdss, lme4, dplyr, tibble); regression_discontinuity (rdss, rdrobust); regression_discontinuity_fuzzy (rdss, rdrobust); structural_estimation (bbmle)
+#> print(list_designs(), list_all = TRUE) lists every design.
 #> 
 #> See design_info("id") or get_args("id") for details;
-#> as.data.frame(list_designs()) for the full table.
+#> as.data.frame(list_designs(discover_params = TRUE)) for parameters.
 ```
 
 Call
 [`list_designs()`](https://macartan.github.io/ResearchDesigns/reference/list_designs.md)
-to see ids, aliases, labels, packages, and (with
-`discover_params = TRUE`) modifiable parameters. Use
-`design_info("two_arm_trial")` for the English profile of one design, or
-`as.data.frame(list_designs())` for the full table.
+to see ids and labels. Use `design_info("two_arm_trial")` or
+`get_args("two_arm_trial")` for one design, or
+`as.data.frame(list_designs(discover_params = TRUE))` for the table
+including redesignable parameters.
 
 ## Use ResearchDesigns to make a design
 
@@ -110,7 +127,10 @@ my_design
 
 Parameters are taken from the design itself. Pass new values to
 [`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md);
-under the hood this uses DeclareDesign’s `redesign()`.
+under the hood this uses DeclareDesign’s `redesign()`. A core set of
+designs also keep DesignLibrary names, so
+`two_arm_designer(N = 40, ate = 0.2)` is the same idea as
+`make_design("two_arm", N = 40, ate = 0.2)`.
 
 ``` r
 

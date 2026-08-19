@@ -10,6 +10,7 @@ labels, categories, book aliases, `diagnosands:` display defaults, and
 
     list_designs()
     make_design("two_arm_trial", b = 0.5)
+    two_arm_designer(N = 40, ate = 0.2)
     get_args("two_arm_trial")
     get_code("two_arm_trial")
     run_shiny()

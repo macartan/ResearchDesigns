@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ResearchDesigns</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,27 +125,44 @@ available to <code><a href="../reference/make_design.html">make_design()</a></co
 <h2 id="what-designs-are-included">What designs are included?<a class="anchor" aria-label="anchor" href="#what-designs-are-included"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/list_designs.html">list_designs</a></span><span class="op">(</span>discover_params <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ResearchDesigns library: 58 designs</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/list_designs.html">list_designs</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ResearchDesigns library: 67 designs</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  id                  alias label                                               </span></span>
-<span><span class="co">#&gt;  two_arm_trial             Simple two-arm trial                                </span></span>
-<span><span class="co">#&gt;  two_arm_with_blocks       Two-arm trial with blocks                           </span></span>
-<span><span class="co">#&gt;  baseline_over_N     11.1  A baseline declaration intended to be reed over $N$.</span></span>
-<span><span class="co">#&gt;  audit_experiment    17.1  audit experiment                                    </span></span>
-<span><span class="co">#&gt;  audit_intervention  17.2  audit intervention                                  </span></span>
+<span><span class="co">#&gt; * Getting started</span></span>
+<span><span class="co">#&gt;   two_arm_trial (Simple two-arm trial)</span></span>
+<span><span class="co">#&gt;   two_arm (Flexible two-arm trial (library))</span></span>
+<span><span class="co">#&gt;   multiarm_trial (Multi-arm trial)</span></span>
+<span><span class="co">#&gt;   two_arm_with_blocks (Two-arm trial with blocks)</span></span>
+<span><span class="co">#&gt;   block_cluster_two_arm (Two arm trial with blocks and clusters)</span></span>
+<span><span class="co">#&gt;   two_arm_attrition (Two-arm trial with attrition)</span></span>
+<span><span class="co">#&gt;   two_by_two (2x2 factorial (library))</span></span>
+<span><span class="co">#&gt;   factorial_2x2x2 (2x2x2 factorial)</span></span>
+<span><span class="co">#&gt;   pretest_posttest (Pretest-posttest design)</span></span>
+<span><span class="co">#&gt;   randomized_response (Randomized response)</span></span>
+<span><span class="co">#&gt;   mediation_analysis (Mediation analysis)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ... and 53 more.</span></span>
+<span><span class="co">#&gt; * Other RDSS designs</span></span>
+<span><span class="co">#&gt;   audit_experiment (audit experiment)</span></span>
+<span><span class="co">#&gt;   audit_intervention (audit intervention)</span></span>
+<span><span class="co">#&gt;   bare_bones_two_arm (Bare-bones two-arm trial)</span></span>
+<span><span class="co">#&gt;   baseline_over_N (A baseline declaration intended to be reed over $N$.)</span></span>
+<span><span class="co">#&gt;   block_randomized_trial (block randomized trial)</span></span>
+<span><span class="co">#&gt;   blocked_and_clustered (blocked and clustered)</span></span>
+<span><span class="co">#&gt;   bootstrapped (bootstrapped)</span></span>
+<span><span class="co">#&gt;   cluster_random_sampling (cluster random sampling)</span></span>
+<span><span class="co">#&gt;   conditional_expectation (Conditional expectation function)</span></span>
+<span><span class="co">#&gt;   conjoint (conjoint)</span></span>
+<span><span class="co">#&gt;   ... and 46 more</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Packages: conditional_expectation (purrr, tibble); conjoint (rdss, cjoint); diff_in_diff (rdss, DIDmultiplegt); italian_village_bayes (rdss, rstanarm); logit_probit_ols (margins, broom); matching (MatchIt); multi_site_studies (metafor); multilevel (rdss, lme4, dplyr, tibble); network_experiment (rdss, spdep, interference, tidyverse); process_tracing (rdss, CausalQueries); multilevel_answer_strategies (rdss, lme4, dplyr, tibble); regression_discontinuity (rdss, rdrobust); regression_discontinuity_fuzzy (rdss, rdrobust); structural_estimation (bbmle)</span></span>
+<span><span class="co">#&gt; print(list_designs(), list_all = TRUE) lists every design.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; See design_info("id") or get_args("id") for details;</span></span>
-<span><span class="co">#&gt; as.data.frame(list_designs()) for the full table.</span></span></code></pre></div>
-<p>Call <code><a href="../reference/list_designs.html">list_designs()</a></code> to see ids, aliases, labels,
-packages, and (with <code>discover_params = TRUE</code>) modifiable
-parameters. Use <code>design_info("two_arm_trial")</code> for the
-English profile of one design, or
-<code>as.data.frame(list_designs())</code> for the full table.</p>
+<span><span class="co">#&gt; as.data.frame(list_designs(discover_params = TRUE)) for parameters.</span></span></code></pre></div>
+<p>Call <code><a href="../reference/list_designs.html">list_designs()</a></code> to see ids and labels. Use
+<code>design_info("two_arm_trial")</code> or
+<code>get_args("two_arm_trial")</code> for one design, or
+<code>as.data.frame(list_designs(discover_params = TRUE))</code> for the
+table including redesignable parameters.</p>
 </div>
 <div class="section level2">
 <h2 id="use-researchdesigns-to-make-a-design">Use ResearchDesigns to make a design<a class="anchor" aria-label="anchor" href="#use-researchdesigns-to-make-a-design"></a>
@@ -165,7 +182,9 @@ English profile of one design, or
 </h2>
 <p>Parameters are taken from the design itself. Pass new values to
 <code><a href="../reference/make_design.html">make_design()</a></code>; under the hood this uses DeclareDesign’s
-<code>redesign()</code>.</p>
+<code>redesign()</code>. A core set of designs also keep DesignLibrary
+names, so <code>two_arm_designer(N = 40, ate = 0.2)</code> is the same
+idea as <code>make_design("two_arm", N = 40, ate = 0.2)</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_design.html">make_design</a></span><span class="op">(</span><span class="st">"two_arm_trial"</span>, b <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">simulate_design</span><span class="op">(</span>sims <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>

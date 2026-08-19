@@ -13,7 +13,7 @@ parameter list."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ResearchDesigns</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@ parameter list.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">param_coverage_gaps</span><span class="op">(</span><span class="va">design</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">param_coverage_gaps</span><span class="op">(</span><span class="va">design</span>, include_steps <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,11 +61,22 @@ parameter list.</p>
 <dl><dt id="arg-design">design<a class="anchor" aria-label="anchor" href="#arg-design"></a></dt>
 <dd><p>Design id/alias, or a parsed design list from <code>parse_design_file()</code>.</p></dd>
 
+
+<dt id="arg-include-steps">include_steps<a class="anchor" aria-label="anchor" href="#arg-include-steps"></a></dt>
+<dd><p>If <code>TRUE</code>, also report design pieces.
+Default <code>FALSE</code> (audit-friendly).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Data frame of gaps (possibly empty) with columns
 <code>id</code>, <code>name</code>, <code>type</code>, <code>atomic</code>, <code>used_in_code</code>, <code>in_finder</code>, <code>in_params</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Design steps (MIDA pieces built with <code>declare_*</code>, etc.) are not parameters
+and are omitted unless <code>include_steps = TRUE</code>. Functions assigned before
+<code>design &lt;-</code> are R-only parameters.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

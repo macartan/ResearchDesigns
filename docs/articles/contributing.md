@@ -107,7 +107,8 @@ Optional frontmatter sits between `---` lines at the top of the file.
 | `keywords` | List of search terms, e.g. `[experiment, blocking]`. |
 | `packages` | Extra R packages beyond DeclareDesignZero, e.g. `[margins, broom]`. |
 | `diagnosands` | Preferred display diagnosands, e.g. `[rmse, bias]`. Prefix with `-` to hide one (`rmse, -bias, power`). |
-| `params` | Map parameter names to tip strings. Always quote keys: `"N": "Sample size"`. Names must match redesignable parameters. |
+| `params` | Map parameter names to tip strings. Always quote keys: `"N": "Sample size"`. Names must match redesignable parameters. Data frames and matrices are R-only (`make_design(..., data = ...)`), not Shiny controls. |
+| `coupled` | Optional map from a driver to dependents that must match its length, e.g. `m_arms: [outcome_means, outcome_sds, conditions]`. [`make_design()`](https://macartan.github.io/ResearchDesigns/reference/make_design.md) [`message()`](https://rdrr.io/r/base/message.html)s and the Shiny redesign help box always show the note. |
 | `book_link` | URL to a book section or external docs. |
 | `include_in_shiny` | `true` (default) or `false`. Set `false` for incomplete or heavy designs. |
 | `object` | Name of the design object in the file. Omit if the object is named `design`. |
@@ -136,17 +137,18 @@ include_in_shiny: true
 
 library(ResearchDesigns)
 contributor_checklist()
-#>  [1] "File lives in inst/designs/ and is self-contained (no source() of other designs)."                                                                                                                                           
-#>  [2] "Filename matches the substantive id (e.g. two_arm_trial.R)."                                                                                                                                                                 
-#>  [3] "YAML frontmatter is optional. If present, may set id, alias (book ref), label, category, keywords, packages, diagnosands, include_in_shiny, functional, book_link, params; object: only if the design is not named `design`."
-#>  [4] "No YAML is fine: id = filename stem, label = humanized id, category = Other, object = design, include_in_shiny = TRUE, functional = TRUE."                                                                                   
-#>  [5] "Set functional: false to park a design (e.g. unavailable dependencies). Skipped by audit, smoke tests, and dependency install; forces include_in_shiny: false."                                                              
-#>  [6] "The design object is the source of truth for editable parameters."                                                                                                                                                           
-#>  [7] "YAML params map names to tip strings; always quote keys (e.g. \"N\": \"Sample size\", \"b\": \"Effect size\"); names must match design parameters (no extras)."                                                              
-#>  [8] "Optional diagnosands: preferred display diagnosands (e.g. diagnosands: rmse, bias or [rmse, bias]); prefix with - to exclude (rmse, -bias, power). Shiny Diagnosis and Redesign use these defaults."                         
-#>  [9] "Extra packages listed under packages: and available to install."                                                                                                                                                             
-#> [10] "Design evaluates under DeclareDesignZero; redesign() works for documented parameters."                                                                                                                                       
-#> [11] "Run refresh_library() from the package source tree after adding or editing designs (or set options(ResearchDesigns.root = \"...\"))."
+#>  [1] "File lives in inst/designs/ and is self-contained (no source() of other designs)."                                                                                                                                                                                                                                                                                    
+#>  [2] "Filename matches the substantive id (e.g. two_arm_trial.R)."                                                                                                                                                                                                                                                                                                          
+#>  [3] "YAML frontmatter is optional. If present, may set id, alias (book ref), label, category, keywords, packages, diagnosands, include_in_shiny, functional, book_link, params; object: only if the design is not named `design`."                                                                                                                                         
+#>  [4] "No YAML is fine: id = filename stem, label = humanized id, category = Other, object = design, include_in_shiny = TRUE, functional = TRUE."                                                                                                                                                                                                                            
+#>  [5] "Set functional: false to park a design (e.g. unavailable dependencies). Skipped by audit, smoke tests, and dependency install; forces include_in_shiny: false."                                                                                                                                                                                                       
+#>  [6] "The design object is the source of truth for editable parameters: only names assigned before `design <-` (e.g. N <- 1000; declare_model(N = N, ...)) count. Literals inside declare_* (e.g. declare_model(N = 1000)) are not parameters."                                                                                                                             
+#>  [7] "Scalar parameters (N <- 100) can be swept with redesign(N = c(50, 100)). Vector parameters (probs <- c(.1, .2, .3)) are replaced as a whole; the browser edits them as a comma-separated list. Data frames and matrices are package parameters (make_design(..., data = ...)), not Shiny controls — prefer `data <- example_pop` over naming the example as the knob."
+#>  [8] "YAML params map names to tip strings; always quote keys (e.g. \"N\": \"Sample size\", \"b\": \"Effect size\"); names must match those redesignable parameters (no extras). Design steps (model_*, inquiry_*, etc.) are not params."                                                                                                                                   
+#>  [9] "Optional diagnosands: preferred display diagnosands (e.g. diagnosands: rmse, bias or [rmse, bias]); prefix with - to exclude (rmse, -bias, power). Shiny Diagnosis and Redesign use these defaults."                                                                                                                                                                  
+#> [10] "Extra packages listed under packages: and available to install."                                                                                                                                                                                                                                                                                                      
+#> [11] "Design evaluates under DeclareDesignZero; redesign() works for documented parameters. A design that loads but does not run fails the audit."                                                                                                                                                                                                                          
+#> [12] "Run refresh_library() from the package source tree after adding or editing designs (or set options(ResearchDesigns.root = \"...\"))."
 ```
 
 In R the same helpers are
@@ -154,3 +156,14 @@ In R the same helpers are
 [`audit_designs()`](https://macartan.github.io/ResearchDesigns/reference/audit_designs.md),
 and
 [`refresh_library()`](https://macartan.github.io/ResearchDesigns/reference/refresh_library.md).
+
+Eight designs also have DesignLibrary names:
+[`two_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_arm_designer.md),
+[`two_arm_attrition_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_arm_attrition_designer.md),
+[`pretest_posttest_designer()`](https://macartan.github.io/ResearchDesigns/reference/pretest_posttest_designer.md),
+[`randomized_response_designer()`](https://macartan.github.io/ResearchDesigns/reference/randomized_response_designer.md),
+[`mediation_analysis_designer()`](https://macartan.github.io/ResearchDesigns/reference/mediation_analysis_designer.md),
+[`multi_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/multi_arm_designer.md),
+[`two_by_two_designer()`](https://macartan.github.io/ResearchDesigns/reference/two_by_two_designer.md),
+and
+[`block_cluster_two_arm_designer()`](https://macartan.github.io/ResearchDesigns/reference/block_cluster_two_arm_designer.md).
