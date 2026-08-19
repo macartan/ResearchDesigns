@@ -6,6 +6,7 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment intervention study design. (chapter 17).
+packages: [dplyr]
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num2
 include_in_shiny: true
 ---

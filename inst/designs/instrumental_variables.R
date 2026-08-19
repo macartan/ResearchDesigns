@@ -6,6 +6,7 @@ category: rdss
 keywords: [observational, causal]
 description: >
   Instrumental variables design. (chapter 16).
+packages: [dplyr]
 params:
   "N": "Number of units (sample or population size)"
   "a": "First-stage / instrument effect (or intercept; see design)"

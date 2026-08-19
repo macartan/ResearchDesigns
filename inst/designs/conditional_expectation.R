@@ -5,7 +5,7 @@ label: Conditional expectation function
 category: rdss
 description: >
   Conditional expectation function design (chapter 11).
-packages: [purrr, tibble]
+packages: [purrr, tibble, dplyr, tidyr, stringr]
 params:
   "x_range": "Support / range of the running covariate X"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num4

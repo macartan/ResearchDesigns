@@ -6,6 +6,7 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   Audit experiment design. (chapter 17).
+packages: [dplyr]
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num1
 include_in_shiny: true
 ---

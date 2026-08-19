@@ -6,7 +6,7 @@ category: rdss
 keywords: [observational, causal]
 description: >
   Difference-in-differences design (chapter 16).
-packages: [rdss, DIDmultiplegt]
+packages: [rdss, DIDmultiplegt, dplyr]
 params:
   "N_time_periods": "Number of time periods"
   "N_units": "Number of units (panel cross-section size)"
