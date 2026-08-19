@@ -6,13 +6,17 @@ category: rdss
 keywords: [experiment, descriptive]
 description: >
   List experiment design. (chapter 17).
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/library/experimental-descriptive.html#def-ch17num3
 include_in_shiny: true
 ---
 
+N <- 500
+
 design <-
   declare_model(
-    N = 500,
+    N = N,
     control_count = rbinom(N, size = 3, prob = 0.5),
     Y_star = rbinom(N, size = 1, prob = 0.3),
     potential_outcomes(Y_list ~ Y_star * Z + control_count) 

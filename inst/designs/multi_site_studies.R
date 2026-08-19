@@ -8,7 +8,6 @@ description: >
   Multi-site studies with and without coordination. (chapter 19).
 packages: [metafor]
 params:
-  "method": "Estimator or modeling method label"
   "study_assignment_probabilities": "Assignment probabilities by study"
   "study_coordination": "Cross-study coordination parameter"
   "study_intercepts": "Study-specific intercepts"

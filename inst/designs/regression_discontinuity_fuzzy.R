@@ -8,6 +8,7 @@ description: >
   Regression discontinuity designs with varying bandwidths (chapter 16).
 packages: [rdss, rdrobust]
 params:
+  "N": "Number of units (sample or population size)"
   "bandwidth": "RDD estimation bandwidth"
   "cutoff": "Regression discontinuity cutoff"
 book_link: https://book.declaredesign.org/library/observational-causal.html#def-ch16num6
@@ -21,9 +22,11 @@ control <- function(X) {
 treatment <- function(X) {
   as.vector(poly(X - cutoff, 4, raw = TRUE) %*% c(0, -1.5, .5, .8)) + .15}
 
+N <- 500
+
 design <-
   declare_model(
-    N = 500,
+    N = N,
     U = rnorm(N, 0, 0.1),
     X = runif(N, 0, 1) + U,
     D = 1 * (X > cutoff),

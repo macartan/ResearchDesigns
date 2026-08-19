@@ -8,6 +8,7 @@ description: >
   Chapter 2 design that uses background information (history) for blocked
   assignment and a blocked difference-in-means estimator.
 params:
+  "N": "Number of units (sample or population size)"
   "b": "Treatment effect (outcome scale)"
 book_link: https://book.declaredesign.org/introduction/what-is-a-research-design.html#def-ch2num2
 include_in_shiny: true
@@ -16,10 +17,12 @@ include_in_shiny: true
 
 b <- 0
 
+N <- 1000
+
 design <-
   
   declare_model(
-    N = 1000,
+    N = N,
     history = sample(c(0, 1), N, replace = TRUE),
     potential_outcomes(Y ~ b * history + runif(1, 0, 0.5) * Z + rnorm(N))
   ) +

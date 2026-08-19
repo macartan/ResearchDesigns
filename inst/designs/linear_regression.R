@@ -5,12 +5,16 @@ label: Linear regression
 category: rdss
 description: >
   Linear regression design (chapter 13).
+params:
+  "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/declaration-in-code.html#def-ch13num1
 include_in_shiny: false
 ---
 
+N <- 100
+
 design <-
-  declare_model(N = 100,
+  declare_model(N = N,
                 U = rnorm(N),
                 potential_outcomes(Y ~ 0.2 * Z + U)) +
   declare_inquiry(ATE = mean(Y_Z_1 - Y_Z_0)) +

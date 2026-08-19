@@ -10,11 +10,11 @@ description: >
   model from data.
 packages: [bbmle]
 params:
+  "N": "Number of units (sample or population size)"
   "n": "Sample size drawn from the population (when N is population size)"
   "alpha": "Utility or structural intercept parameter"
   "delta": "Effect shift or discounting parameter"
   "kappa": "Structural / scale parameter"
-  "method": "Estimator or modeling method label"
 book_link: https://book.declaredesign.org/library/complex.html#def-ch19num2
 include_in_shiny: true
 ---
@@ -38,10 +38,12 @@ delta <- 0.8  # True discount factor (unknown)
 kappa <- 2    # Parameter to govern error in offers (unknown)
 alpha <- 0.5  # Share of behavioral types in the population (unknown)
 
+N <- 200
+
 design <- 
   declare_model(
     # Define the population: indicator for behavioral type (norm = 1)
-    N = 200, 
+    N = N, 
     type = rbinom(N, 1, alpha),
     n = n) +
   declare_inquiry(kappa = kappa,     

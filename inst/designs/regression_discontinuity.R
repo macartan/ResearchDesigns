@@ -8,6 +8,7 @@ description: >
   Regression discontinuity design (chapter 16).
 packages: [rdss, rdrobust]
 params:
+  "N": "Number of units (sample or population size)"
   "cutoff": "Regression discontinuity cutoff"
 book_link: https://book.declaredesign.org/library/observational-causal.html#def-ch16num5
 include_in_shiny: false
@@ -19,9 +20,11 @@ control <- function(X) {
 treatment <- function(X) {
   as.vector(poly(X, 4, raw = TRUE) %*% c(0, -1.5, .5, .8)) + .15}
 
+N <- 500
+
 design <-
   declare_model(
-    N = 500,
+    N = N,
     U = rnorm(N, 0, 0.1),
     X = runif(N, 0, 1) + U - cutoff,
     D = 1 * (X > 0),

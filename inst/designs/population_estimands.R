@@ -19,13 +19,15 @@ include_in_shiny: true
 N <- 20
 n <- 10
 
+superpopulation_mean <- 1
+
 design <-
   declare_model(
     N = N, 
     Y = 1 + rnorm(N)
   ) +
   declare_inquiry(
-    superpopulation_mean = 1,
+    superpopulation_mean = superpopulation_mean,
     population_mean = mean(Y)
   ) + 
   declare_sampling(
