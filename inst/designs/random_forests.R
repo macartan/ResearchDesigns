@@ -9,6 +9,7 @@ description: >
   effect heterogeneity. The design targets individual level causal
   effects and identifies which variables are mostly commonly used to
   predict causal effects.
+packages: [dplyr, grf]
 params:
   "N": "Number of units (sample or population size)"
   "covariate_names": "Names of covariates used by the learner"

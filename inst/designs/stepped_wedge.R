@@ -6,6 +6,7 @@ category: rdss
 keywords: [experiment, causal]
 description: >
   Stepped-wedge design. (chapter 18).
+packages: [dplyr]
 params:
   "effect_size": "Treatment effect size"
 book_link: https://book.declaredesign.org/library/experimental-causal.html#def-ch18num10

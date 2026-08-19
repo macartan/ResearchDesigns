@@ -6,6 +6,7 @@ category: rdss
 description: >
   A baseline declaration intended to be redesigned over $N$. (chapter
   11).
+packages: [broom]
 params:
   "N": "Number of units (sample or population size)"
 book_link: https://book.declaredesign.org/declaration-diagnosis-redesign/redesigning.html#def-ch11num1

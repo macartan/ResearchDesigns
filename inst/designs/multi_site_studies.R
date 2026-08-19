@@ -6,7 +6,7 @@ category: rdss
 keywords: [complex]
 description: >
   Multi-site studies with and without coordination. (chapter 19).
-packages: [metafor]
+packages: [metafor, rdss, dplyr, tidyr, broom]
 params:
   "study_assignment_probabilities": "Assignment probabilities by study"
   "study_coordination": "Cross-study coordination parameter"
