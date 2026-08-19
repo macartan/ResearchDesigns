@@ -1,10 +1,13 @@
 # ResearchDesigns audit report
 
-Summary: **52/58** designs OK, **1** parked (`functional: false`), **5** failed.
+Summary: **51/58** designs OK, **1** parked (`functional: false`), **6** failed.
 
 Issue types: `missing_packages`, `yaml_extra_params`, `param_discovery`, `load_error`, `missing_object`, `diagnose_failed`, `disabled`, `other`.
 
-Soft notes (do not fail the audit): undocumented params, coverage gaps.
+Soft notes (do not fail the audit):
+- `no YAML tip`: redesignable param has no tip string in YAML (optional).
+- `assigned before design but not redesignable`: top-level `name <- ...` is used by the design but `redesign()` cannot change it (often a fixed vector/data object).
+Design steps (`declare_*` pieces) and helper functions are not parameters and are not listed.
 Parked designs (`functional: false`) are listed under Disabled and do not count as failures.
 Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.
 
@@ -14,40 +17,36 @@ Plain-text listing (`audit_report.txt`) puts FAIL/SKIP first, then OK.
 
 ## Failures
 
-### param_discovery
-
-- **latent_variables** (`15.6`)
-  - attempt to use zero-length variable name
-  - atomic coverage gaps: N
-
-- **multilevel** (`15.4`)
-  - attempt to use zero-length variable name
-
-- **multilevel_answer_strategies** (`15.5`)
-  - attempt to use zero-length variable name
-
 ### yaml_extra_params
 
-- **simple_random_sampling** (`15.1`)
-  - YAML params not in design: portola
-  - extra YAML: portola
+- **italian_village_continued** (`9.2`)
+  - YAML params not in design: linear_hypothesis
+  - YAML tip for non-param: linear_hypothesis
 
-- **subgroup_effects** (`18.6`)
-  - YAML params not in design: fixed_pop, book_link
-  - extra YAML: fixed_pop, book_link
+- **multi_site_studies** (`19.4`)
+  - YAML params not in design: method
+  - YAML tip for non-param: method
+
+- **population_estimands** (`7.1`)
+  - YAML params not in design: superpopulation_mean
+  - YAML tip for non-param: superpopulation_mean
+
+- **process_tracing** (`16.1b`)
+  - YAML params not in design: query
+  - YAML tip for non-param: query
+
+- **random_forests** (`19.1`)
+  - YAML params not in design: share_train
+  - YAML tip for non-param: share_train
+
+- **structural_estimation** (`19.2`)
+  - YAML params not in design: method
+  - YAML tip for non-param: method
 
 ## Soft notes (OK designs)
 
-- **cluster_random_sampling**: undocumented: locality_shock, individual_shock, se_type; gaps: budget_function
-- **conditional_expectation**: undocumented: N; atomic gaps: polynomial_degrees
-- **conjoint**: undocumented: respondent.id; gaps: conjoint_utility
-- **diff_in_diff**: undocumented: Y, G, T, D, mode
-- **italian_village_continued**: gaps: declaration_9.1
-- **matching**: gaps: exact_matching
-- **random_forests**: gaps: get_best_predictor
-- **regression_discontinuity**: undocumented: N, c
-- **regression_discontinuity_fuzzy**: undocumented: N
-- **trust_game**: undocumented: id_cols, names_from
+- **cluster_random_sampling**: no YAML tip: locality_shock, individual_shock
+- **conditional_expectation**: assigned but not redesignable: polynomial_degrees
 
 ## Full table
 
