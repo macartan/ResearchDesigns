@@ -1,15 +1,17 @@
-ResearchDesigns audit: 61/62 ok, 1 parked
+ResearchDesigns audit: 65/65 ok
 (Order: FAIL, SKIP/parked, OK-with-notes, OK)
 
- - network_experiment: SKIP [disabled] - functional: false (parked; skipped by audit)
  - cluster_random_sampling: OK
      no YAML tip (ok): locality_shock, individual_shock
  - conditional_expectation: OK
      assigned before design but not redesignable: polynomial_degrees
+ - network_experiment: OK
+     no YAML tip (ok): adjacency, permutations
  - audit_experiment: OK
  - audit_intervention: OK
  - bare_bones_two_arm: OK
  - baseline_over_N: OK
+ - block_cluster_two_arm: OK
  - block_randomized_trial: OK
  - blocked_and_clustered: OK
  - bootstrapped: OK
@@ -22,6 +24,7 @@ ResearchDesigns audit: 61/62 ok, 1 parked
  - encouragement: OK
  - example_declaration: OK
  - factorial_2x2: OK
+ - factorial_2x2x2: OK
  - instrumental_variables: OK
  - italian_village: OK
  - italian_village_bayes: OK
@@ -33,6 +36,7 @@ ResearchDesigns audit: 61/62 ok, 1 parked
  - list_or_direct_questions: OK
  - logit_probit_ols: OK
  - matching: OK
+ - mediation_analysis: OK
  - multi_arm_three: OK
  - multi_site_studies: OK
  - multilevel: OK
