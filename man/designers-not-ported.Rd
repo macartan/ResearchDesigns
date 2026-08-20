@@ -29,13 +29,14 @@ two_arm_covariate_designer(...)
 \item{...}{Ignored.}
 }
 \value{
-Invisible \code{NULL}.
+Nothing: these always stop.
 }
 \description{
-These names exist so code written for DesignLibrary does not fail with
-"object not found". They message with related declarations via
-\code{\link[=make_design]{make_design()}}, for example \code{make_design("encouragement")} or
-\code{make_design("factorial_2x2")}.
+These names exist so that code written for DesignLibrary fails with an
+error that says what to write instead, rather than with "object not found"
+or, worse, several lines later on a \code{NULL} design. Each names the related
+declarations available through \code{\link[=make_design]{make_design()}}, for example
+\code{make_design("encouragement")} or \code{make_design("factorial_2x2")}.
 }
 \seealso{
 \code{\link[=make_design]{make_design()}}

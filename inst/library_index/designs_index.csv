@@ -41,12 +41,12 @@
 ",TRUE,TRUE,"factorial_2x2x2.R"
 "instrumental_variables","16.4","instrumental variables","rdss","observational, causal","dplyr","N, prob, a, b","Instrumental variables design. (chapter 16).
 ",TRUE,TRUE,"instrumental_variables.R"
-"italian_village","9.1","Italian village","rdss","","","N","Italian village design. (chapter 9).
-",FALSE,TRUE,"italian_village.R"
 "italian_village_bayes","9.3","Italian village  a la Bayes.","rdss","","rdss, rstanarm","N, summary_fn","Italian village design a la Bayes. (chapter 9).
 ",FALSE,TRUE,"italian_village_bayes.R"
 "italian_village_continued","9.2","Italian village , continued","rdss","","","N, linear_hypothesis","Italian village design, continued (chapter 9).
 ",FALSE,TRUE,"italian_village_continued.R"
+"italian_village","9.1","Italian village","rdss","","","N","Italian village design. (chapter 9).
+",FALSE,TRUE,"italian_village.R"
 "latent_variables","15.6","latent variables","rdss","observational, descriptive","","N","Latent variable design (chapter 15).
 ",TRUE,TRUE,"latent_variables.R"
 "lin_estimator","18.3","lin estimator","rdss","experiment, causal","","prob, control_slope, N","Lin estimator design. (chapter 18).
@@ -65,12 +65,12 @@
 ",TRUE,TRUE,"mediation_analysis.R"
 "multi_site_studies","19.4","multi-site studies","rdss","complex","metafor, rdss, dplyr, tidyr, broom","study_sizes, study_assignment_probabilities, study_intercepts, study_priors, study_coordination","Multi-site studies with and without coordination. (chapter 19).
 ",TRUE,TRUE,"multi_site_studies.R"
-"multiarm_trial",NA,"Multi-arm trial","template","experiment, causal, multiarm","","N, m_arms, outcome_means, outcome_sds, conditions, sd_i, Y","Multi-arm experiment with equal assignment probabilities. The outcome is a function of the assigned arm: the arm mean plus a shared shock and optional per-arm noise. Inquiries are average effects versus arm 1, e.g. mean(Y(2) - Y(1)). Estimation is one lm_robust of Y on factor(Z). The number of arms is m_arms (default 3). outcome_means, outcome_sds, and conditions are length-m_arms vectors.
+"multiarm_trial",NA,"Multi-arm trial","template","experiment, causal, multiarm","","N, m_arms, outcome_means, outcome_sds, conditions, sd_i, Y","Multi-arm experiment with equal assignment probabilities. The outcome is a function of the assigned arm: the arm mean plus a shared shock and optional per-arm noise. The per-arm noise is drawn when the outcome is measured, so a unit has no fixed potential outcome under an arm it was not assigned to, and the inquiries are population contrasts of arm means, outcome_means[k] - outcome_means[1], rather than sample average effects. Estimation is one lm_robust of Y on factor(Z). The number of arms is m_arms (default 3). outcome_means, outcome_sds, and conditions are length-m_arms vectors.
 ",TRUE,TRUE,"multiarm_trial.R"
-"multilevel","15.4","multilevel","rdss","observational, descriptive","rdss, lme4, dplyr, tibble","states","Multilevel regression and poststratification design. (chapter 15).
-",TRUE,TRUE,"multilevel.R"
 "multilevel_answer_strategies","15.5","Redesign over answer strategies.","rdss","observational, descriptive","rdss, lme4, dplyr, tibble","states","Redesign over answer strategies. (chapter 15).
 ",FALSE,TRUE,"multilevel_answer_strategies.R"
+"multilevel","15.4","multilevel","rdss","observational, descriptive","rdss, lme4, dplyr, tibble","states","Multilevel regression and poststratification design. (chapter 15).
+",TRUE,TRUE,"multilevel.R"
 "network_experiment","18.13","network experiment","rdss","experiment, causal","rdss, spdep, interference, tidyverse","controlled_direct_effect, controlled_indirect_effect, total_effect, adjacency, permutations, estimator_AS","Experiments over spatial networks design. (chapter 18).
 ",TRUE,TRUE,"network_experiment.R"
 "pate_with_sampling","4.1","PATE with sampling","rdss","sampling, experiment, PATE","","N, n, b, prob","Sample from a population, then randomly assign treatment. Inquiry is the population average treatment effect (PATE).
@@ -89,10 +89,10 @@
 ",TRUE,TRUE,"randomized_response.R"
 "randomized_saturation","18.12","randomized saturation","rdss","experiment, causal","dplyr","N_groups, N_per_group, effect_Z, effect_S_low, effect_S_high","Randomized saturation design. (chapter 18).
 ",TRUE,TRUE,"randomized_saturation.R"
-"regression_discontinuity","16.5","regression discontinuity","rdss","observational, causal","rdss, rdrobust","cutoff, control, treatment, N","Regression discontinuity design (chapter 16).
-",FALSE,TRUE,"regression_discontinuity.R"
 "regression_discontinuity_fuzzy","16.6","regression discontinuity fuzzy","rdss","observational, causal","rdss, rdrobust","bandwidth, cutoff, control, treatment, N","Regression discontinuity designs with varying bandwidths (chapter 16).
 ",TRUE,TRUE,"regression_discontinuity_fuzzy.R"
+"regression_discontinuity","16.5","regression discontinuity","rdss","observational, causal","rdss, rdrobust","cutoff, control, treatment, N","Regression discontinuity design (chapter 16).
+",FALSE,TRUE,"regression_discontinuity.R"
 "simple_random_sampling","15.1","simple random sampling","rdss","observational, descriptive","","data, cuts, sample_size","Simple random sampling design (chapter 15).
 ",TRUE,TRUE,"simple_random_sampling.R"
 "single_period_two_arm","18.11","Comparison single-period two arm trial","rdss","experiment, causal","","n_units, effect_size","Comparison single-period two arm trial design. (chapter 18).
@@ -107,22 +107,22 @@
 ",TRUE,TRUE,"survey_nonresponse.R"
 "trust_game","17.6","trust game","rdss","experiment, descriptive","","n_pairs, deceive, invested, average_invested, returned, average_returned","Trust game design. (chapter 17).
 ",TRUE,TRUE,"trust_game.R"
-"two_arm",NA,"Flexible two-arm trial (library)","template","experiment, two-arm","","N, assignment_prob, control_mean, control_sd, ate, treatment_sd, rho","One-level two-arm trial with complete random assignment. Potential outcomes are jointly normal, with correlation rho between the control and treatment shocks. Argument names match DesignLibrary::two_arm_designer; ate is the difference in means, so the treatment mean is control_mean + ate.
-",TRUE,TRUE,"two_arm.R"
 "two_arm_attrition",NA,"Two-arm trial with attrition","template","experiment, causal, attrition","","N, a_R, b_R, a_Y, b_Y, rho","Two-arm trial in which the outcome is observed only for units that report. Treatment can move reporting as well as the outcome, so the design contrasts the effect on reporting, the effect on the outcome among reporters, and the effect on the outcome had it been observed for everyone. Flattened from DesignLibrary::two_arm_attrition_designer.
 ",TRUE,TRUE,"two_arm_attrition.R"
 "two_arm_randomized_experiment","13.2","Declaration of two-arm randomized experiment","rdss","","","N","Declaration of two-arm randomized experiment (chapter 13).
 ",FALSE,TRUE,"two_arm_randomized_experiment.R"
-"two_arm_trial",NA,"Simple two-arm trial","template","experiment, two-arm","","N, b","Simple two-arm trial with complete random assignment.
-",TRUE,TRUE,"two_arm_trial.R"
 "two_arm_trial_library","18.1","two-arm trial","rdss","experiment, causal","","N, b","Canonical two-arm trial design. (chapter 18).
 ",TRUE,TRUE,"two_arm_trial_library.R"
 "two_arm_trial_rdss","2.1","Two-arm trial from RDSS","rdss","experiment, two-arm, introduction","","N, b, n","Two-arm trial design from RDSS chapter 2. Illustrates MIDA with a simple sampling and complete random assignment step.
 ",TRUE,TRUE,"two_arm_trial_rdss.R"
-"two_arm_with_blocks",NA,"Two-arm trial with blocks","template","experiment, two-arm, blocking","","k, block_size, b","Simple two arm design with block randomization
-",TRUE,TRUE,"two_arm_with_blocks.R"
+"two_arm_trial",NA,"Simple two-arm trial","template","experiment, two-arm","","N, b","Simple two-arm trial with complete random assignment.
+",TRUE,TRUE,"two_arm_trial.R"
 "two_arm_with_blocks_rdss","2.2","Two-arm trial with blocks from RDSS","rdss","experiment, two-arm, blocking, introduction","","b, N","Chapter 2 design that uses background information (history) for blocked assignment and a blocked difference-in-means estimator.
 ",TRUE,TRUE,"two_arm_with_blocks_rdss.R"
+"two_arm_with_blocks",NA,"Two-arm trial with blocks","template","experiment, two-arm, blocking","","k, block_size, b","Simple two arm design with block randomization
+",TRUE,TRUE,"two_arm_with_blocks.R"
+"two_arm",NA,"Flexible two-arm trial (library)","template","experiment, two-arm","","N, assignment_prob, control_mean, control_sd, ate, treatment_sd, rho","One-level two-arm trial with complete random assignment. Potential outcomes are jointly normal, with correlation rho between the control and treatment shocks. Argument names match DesignLibrary::two_arm_designer; ate is the difference in means, so the treatment mean is control_mean + ate.
+",TRUE,TRUE,"two_arm.R"
 "two_by_two",NA,"2x2 factorial (library)","template","experiment, causal, factorial","","N, prob_A, prob_B, weight_A, weight_B, outcome_means, sd_i, outcome_sds","Two-by-two factorial with independent assignment of A then B within blocks of A. Cell means are the vector outcome_means in order AB = 00, 01, 10, 11. Inquiries are the weighted average effect of each factor and the interaction. Argument names match DesignLibrary::two_by_two_designer.
 ",TRUE,TRUE,"two_by_two.R"
 "two_outcome_model_a","10.3a","Two-outcome model A","rdss","","","n","10.3 (chapter 10).

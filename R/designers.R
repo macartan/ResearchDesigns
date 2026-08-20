@@ -394,26 +394,34 @@ block_cluster_two_arm_designer <- function(
   ))
 }
 
-#' Message with related make_design() calls for a DesignLibrary designer we did not port
+#' Stop with related make_design() calls for a DesignLibrary designer we did not port
+#'
+#' These names used to message and return `invisible(NULL)`, which reads as a
+#' courtesy in a new package and as a fault in a new major version of an old
+#' one: `design <- factorial_designer(k = 3)` then failed several lines later,
+#' inside `diagnose_design()`, with an error naming neither the designer nor
+#' the replacement. Stopping puts the complaint at the call that caused it.
+#'
 #' @noRd
 designer_not_ported <- function(old, suggestions) {
-  message(
+  stop(
     old, "() is not in ResearchDesigns. Related designs include:\n",
-    paste0("  ", suggestions, collapse = "\n")
+    paste0("  ", suggestions, collapse = "\n"),
+    call. = FALSE
   )
-  invisible(NULL)
 }
 
 #' DesignLibrary designers not ported as-is
 #'
-#' These names exist so code written for DesignLibrary does not fail with
-#' "object not found". They message with related declarations via
-#' [make_design()], for example `make_design("encouragement")` or
-#' `make_design("factorial_2x2")`.
+#' These names exist so that code written for DesignLibrary fails with an
+#' error that says what to write instead, rather than with "object not found"
+#' or, worse, several lines later on a `NULL` design. Each names the related
+#' declarations available through [make_design()], for example
+#' `make_design("encouragement")` or `make_design("factorial_2x2")`.
 #'
 #' @name designers-not-ported
 #' @param ... Ignored.
-#' @return Invisible `NULL`.
+#' @return Nothing: these always stop.
 #' @seealso [make_design()]
 #' @keywords internal
 NULL

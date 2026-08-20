@@ -112,12 +112,15 @@ test_that("designer argument names match DesignLibrary where we claim them", {
   ))
 })
 
-test_that("unported DesignLibrary designers point at make_design()", {
-  expect_message(factorial_designer(), "make_design\\(\"factorial_2x2\"\\)")
-  expect_message(cluster_sampling_designer(), "cluster_random_sampling")
-  expect_message(two_arm_covariate_designer(), "covariate_adjustment")
-  expect_message(binary_iv_designer(), "encouragement")
-  expect_message(spillover_designer(), "randomized_saturation")
-  expect_message(regression_discontinuity_designer(), "regression_discontinuity")
-  expect_message(process_tracing_designer(), "process_tracing")
+test_that("unported DesignLibrary designers stop and point at make_design()", {
+  # They used to message and return invisible(NULL), so `design <-
+  # factorial_designer(k = 3)` failed further downstream with an error naming
+  # neither the designer nor its replacement.
+  expect_error(factorial_designer(), "make_design\\(\"factorial_2x2\"\\)")
+  expect_error(cluster_sampling_designer(), "cluster_random_sampling")
+  expect_error(two_arm_covariate_designer(), "covariate_adjustment")
+  expect_error(binary_iv_designer(), "encouragement")
+  expect_error(spillover_designer(), "randomized_saturation")
+  expect_error(regression_discontinuity_designer(), "regression_discontinuity")
+  expect_error(process_tracing_designer(), "process_tracing")
 })

@@ -117,7 +117,7 @@ test_that("unported DesignLibrary designers explain the make_design() alternativ
     f <- get(nm, envir = asNamespace("ResearchDesigns"), inherits = FALSE)
     msg <- tryCatch(
       f(),
-      message = function(m) conditionMessage(m)
+      error = function(e) conditionMessage(e)
     )
     expect_true(is.character(msg) && nzchar(msg), info = nm)
     expect_match(msg, "make_design\\(", info = nm)
