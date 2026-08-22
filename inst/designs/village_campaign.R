@@ -8,11 +8,13 @@ description: >
 params:
   "citizens_per_village": "Citizens sampled per village"
   "n_villages": "Number of villages in the sample"
+  "se_type": "Standard error type for the cluster-robust estimator"
 include_in_shiny: false
 ---
 
 n_villages <- 192
 citizens_per_village <- 48
+se_type <- "stata"
 
 design  <- 
   declare_model(
@@ -51,6 +53,6 @@ design  <-
   declare_estimator(Y_observed ~ Z, term = c("Zpersonal", "Zsocial"), 
                     clusters = villages, 
                     .method = lm_robust,
-                    se_type = "stata",
+                    se_type = se_type,
                     inquiry = c("ATE_personal", "ATE_social"))
 
