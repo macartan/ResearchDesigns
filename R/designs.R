@@ -486,7 +486,10 @@ make_design <- function(design = "two_arm_trial", ...) {
   }
   dots <- prepare_redesign_dots(params, dots)
   shown <- message_coupled_if_needed(parsed$meta, dots, design = d, code = parsed$code)
-  d <- do.call(DeclareDesignZero::redesign, c(list(design = d), dots))
+  # `.design` since DeclareDesignZero 2.0: an undotted `design` partially
+  # matched, so a design with a parameter named `d` (mediation_analysis) had
+  # its design object replaced by the parameter's value.
+  d <- do.call(DeclareDesignZero::redesign, c(list(.design = d), dots))
   if (inherits(d, "design")) {
     extra <- setdiff(
       coupled_issues(parsed$meta, list(), design = d, code = parsed$code),
